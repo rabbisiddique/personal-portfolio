@@ -36,7 +36,7 @@ const FloatingSidebar = () => {
 
     { icon: User, label: "About Me", href: "/about" },
 
-    { icon: Code2, label: "Tech Stack", href: "/tech" },
+    { icon: Code2, label: "Tech Stack", href: "/tech-stack" },
 
     { icon: FolderKanban, label: "Projects", href: "/projects" },
 

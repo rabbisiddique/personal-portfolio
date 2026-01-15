@@ -1,3 +1,4 @@
+"use client";
 import { ChevronDown } from "lucide-react";
 import { ExpandableContent } from "./ExpandableContent";
 

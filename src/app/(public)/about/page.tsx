@@ -1,4 +1,5 @@
 "use client";
+import { cardVariants, containerVariants } from "@/animations/stagger-cards";
 import { ExpertiseSection } from "@/components/expertise/ExpertiseSection";
 import { motion } from "framer-motion";
 import {
@@ -19,33 +20,9 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-const containerVariants = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.2,
-    },
-  },
-};
+import { useEffect, useState } from "react";
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.96 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1], // premium easing
-    },
-  },
-};
 export default function AboutPage() {
-  const particlesRef = useRef(null);
-  const [expandedCard, setExpandedCard] = useState<number | null>(null);
-
   const [isDark, setIsDark] = useState(true);
   const [activeTab, setActiveTab] = useState("about");
 
@@ -625,7 +602,7 @@ export default function AboutPage() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="mb-16"
           >
@@ -642,7 +619,7 @@ export default function AboutPage() {
             variants={containerVariants}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
             className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {personalInfo.map((info, index) => (
