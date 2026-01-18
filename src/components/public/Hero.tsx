@@ -1,23 +1,17 @@
 "use client";
 import { motion, useAnimation } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Terminal } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
 
-const roles = [
-  { text: "Full-Stack Developer", icon: "💻" },
-  { text: "Web Designer", icon: "🖌️" },
-  { text: "Frontend Developer", icon: "⚡" },
-];
-
-// Create sequences for TypeAnimation
-const textSequence = roles.flatMap((role) => [role.text, 1500]);
-const iconSequence = roles.flatMap((role) => [role.icon, 1500]);
-
-const HeroSection = () => {
+const HeroPage = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [scrollY, setScrollY] = useState(0);
   const controls = useAnimation();
-
+  const router = useRouter();
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
@@ -26,50 +20,45 @@ const HeroSection = () => {
 
   useEffect(() => {
     controls.start({
-      rotate: scrollY * 0.1,
+      rotate: scrollY * 0.08,
       transition: { duration: 0 },
     });
   }, [scrollY, controls]);
 
   return (
     <section
-      id="home"
-      className="min-h-screen w-full bg-background text-foreground overflow-x-hidden relative m-0 p-0"
+      className={`relative min-h-screen w-full flex items-center justify-center overflow-hidden font-space transition-colors duration-700 ${
+        isDark ? "bg-[#020202] text-white" : "bg-[#fafafa] text-zinc-900"
+      }`}
     >
-      {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden m-0 p-0">
+      {/* Background Architecture */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Grid Matrix Overlay */}
         <div
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat  dark:opacity-[0.4] m-0 p-0"
-          style={{ backgroundImage: "url('/portfolio-background.jpg')" }}
+          className={`absolute inset-0 opacity-[0.1] ${isDark ? "invert" : ""}`}
+          style={{
+            backgroundImage: "radial-gradient(#000 0.5px, transparent 0.5px)",
+            backgroundSize: "30px 30px",
+          }}
         />
 
-        {/* Animated Geometric Overlay */}
+        {/* Rotating Geometric SVG */}
         <motion.div
-          className="absolute left-0 top-1/4 w-96 h-96"
+          className="absolute left-[5%] top-[15%] w-[45vw] h-[45vw] opacity-[0.05]"
           animate={controls}
         >
-          <svg viewBox="0 0 400 400" className="w-full h-full opacity-20">
-            <defs>
-              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ff6b35" />
-                <stop offset="100%" stopColor="#ff8c42" />
-              </linearGradient>
-            </defs>
+          <svg viewBox="0 0 400 400" className="w-full h-full">
             {[...Array(6)].map((_, i) => (
               <motion.path
                 key={i}
-                d={`M${50 + i * 15},${100 + i * 20} L${100 + i * 20},${
-                  50 + i * 15
-                } L${150 + i * 15},${100 + i * 20} L${100 + i * 20},${
-                  150 + i * 15
-                } Z`}
-                stroke="url(#lineGrad)"
-                strokeWidth="1"
+                d={`M${50 + i * 20},${100 + i * 25} L${100 + i * 25},${50 + i * 20} L${150 + i * 20},${100 + i * 25} L${100 + i * 25},${150 + i * 20} Z`}
+                stroke={isDark ? "white" : "black"}
+                strokeWidth="0.8"
                 fill="none"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   delay: i * 0.2,
                   repeat: Infinity,
                   repeatType: "reverse",
@@ -79,191 +68,172 @@ const HeroSection = () => {
           </svg>
         </motion.div>
 
+        {/* Neural Glows */}
         <motion.div
-          className="absolute right-1/4 bottom-0 w-96 h-96 rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(255, 107, 53, 0.2) 0%, transparent 70%)",
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+          transition={{ duration: 10, repeat: Infinity }}
+          className={`absolute -top-20 -right-20 w-[60vw] h-[60vw] blur-[150px] rounded-full ${isDark ? "bg-blue-600/20" : "bg-blue-400/10"}`}
         />
       </div>
 
-      {/* Hero Content */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-6 md:px-12 lg:px-16 xl:px-24 py-12 md:py-16">
-        <div className="w-full max-w-7xl grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col justify-end pb-8 md:pb-12"
-          >
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-8 grid lg:grid-cols-[1.1fr_0.9fr] gap-20 items-center">
+        {/* Left Content */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="space-y-10"
+        >
+          <div className="flex items-center gap-6">
+            <div
+              className={`p-4 rounded-2xl shadow-2xl ${isDark ? "bg-white text-black" : "bg-black text-white"}`}
+            >
+              <Terminal size={24} strokeWidth={3} className="animate-pulse" />
+            </div>
+            <div className="h-[1px] w-12 bg-current opacity-20" />
+            <span className="text-[10px] font-black uppercase tracking-[0.8em] opacity-40">
+              System_Uplink_v3
+            </span>
+          </div>
+
+          <div className="space-y-2">
             <motion.p
-              className="text-muted-foreground text-lg mb-4 tracking-wider font-semibold"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              animate={{ opacity: 0.5 }}
+              className="text-[11px] font-black uppercase tracking-[0.6em]"
             >
-              HELLO
+              Establishing Connection...
             </motion.p>
-
-            <h1 className="text-6xl font-heading font-semibold tracking-tight text-gray-400 dark:text-white">
-              I'm Rabbi Siddique
-            </h1>
-
-            <motion.div
-              className="relative inline-block mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <motion.h2
-                className="text-[35px] font-body md:text-5xl lg:text-6xl xl:text-5xl font-bold leading-tight relative overflow-visible"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.6 }}
+            <h1 className="text-7xl md:text-9xl font-black leading-[0.85] tracking-[-0.04em]">
+              RABBI
+              <br />
+              <span
+                className="text-transparent"
+                style={{
+                  WebkitTextStroke: `1.5px ${isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}`,
+                }}
               >
-                I'm a{" "}
-                <span className="relative whitespace-nowrap">
-                  {/* TypeAnimation text (cursor visible) */}
-                  <TypeAnimation
-                    sequence={[
-                      "FullStack Developer",
-                      1500,
-                      "Web Designer",
-                      1500,
-                      "Frontend Developer",
-                      1500,
-                    ]}
-                    speed={70}
-                    deletionSpeed={50}
-                    repeat={Infinity}
-                    cursor={true}
-                    wrapper="span"
-                    className="text-primary relative z-10 [&>span:first-child]:text-2xl md:[&>span:first-child]:text-4xl lg:[&>span:first-child]:text-5xl xl:[&>span:first-child]:text-4xl"
-                    style={{
-                      display: "inline-block",
-                    }}
-                  />
+                SIDDIQUE
+              </span>
+            </h1>
+          </div>
 
-                  {/* Gradient overlay with transition */}
-                  <motion.span
-                    className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent pointer-events-none z-0"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.1, duration: 0.5 }}
-                  ></motion.span>
-                </span>
-              </motion.h2>
-            </motion.div>
+          <div className="relative">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+              I'm a <br className="md:hidden" />
+              <span className="text-blue-500">
+                <TypeAnimation
+                  sequence={[
+                    "Full-Stack Architect",
+                    2000,
+                    "UX Engineer",
+                    2000,
+                    "System Specialist",
+                    2000,
+                    "Node Expert",
+                    2000,
+                  ]}
+                  speed={50}
+                  repeat={Infinity}
+                  wrapper="span"
+                  cursor={true}
+                />
+              </span>
+            </h2>
+          </div>
 
-            <motion.p
-              className="text-muted-foreground font-heading text-base font-light md:text-lg mb-8 max-w-lg leading-relaxed"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-            >
-              I build thoughtful, scalable web products—combining strong
-              frontend, reliable backends, and practical AI.
-            </motion.p>
+          <p className="text-lg md:text-xl font-medium max-w-lg opacity-50 leading-relaxed">
+            Architecting thoughtful, high-performance web products by merging
+            robust server-side logic with immersive interface design.
+          </p>
 
+          <div className="flex flex-wrap gap-8 pt-6">
             <motion.button
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 md:px-8 py-3 md:py-4 rounded-full flex items-center gap-3 text-base md:text-lg font-semibold shadow-lg hover:shadow-primary/50 transition-all w-fit"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1 }}
-              whileHover={{ scale: 1.05 }}
+              onClick={() => router.push("/about")}
+              whileHover={{
+                scale: 1.05,
+                x: 10,
+                boxShadow: isDark
+                  ? "0 0 40px rgba(59,130,246,0.2)"
+                  : "0 20px 40px rgba(0,0,0,0.1)",
+              }}
               whileTap={{ scale: 0.95 }}
+              className={`px-12 py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.5em] flex items-center gap-6 transition-all shadow-2xl ${isDark ? "bg-white text-black" : "bg-black text-white"}`}
             >
-              View Portfolio
-              <ArrowRight size={20} />
+              Access Terminal <ArrowRight size={18} strokeWidth={3} />
             </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Right Side: Layered Depth Profile */}
+        <div className="relative flex items-center justify-center h-full min-h-[500px]">
+          {/* Background Layer 1: Massive Text */}
+          <motion.div
+            className={`absolute top-[10%] left-0 font-black leading-none opacity-[0.04] pointer-events-none select-none z-0 ${isDark ? "text-white" : "text-black"}`}
+            style={{ fontSize: "10vw" }}
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            FULLSTACK
           </motion.div>
 
-          <motion.div
-            className="relative flex items-end justify-center md:justify-end"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <div className="relative w-full flex items-end justify-center md:justify-end">
-              {/* Floating Text Elements - Top (Behind head) */}
+          {/* Profile Representation Layer (Placeholder Circle for now, can be Image) */}
+          <div className="relative z-10 w-full flex justify-center">
+            <div className="relative group">
+              <div
+                className={`absolute -inset-8 blur-3xl rounded-full opacity-20 transition-all group-hover:opacity-40 ${isDark ? "bg-blue-600" : "bg-blue-400"}`}
+              />
               <motion.div
-                className="
-    absolute top-28
-    left-[70px] right-0
-    text-center
-    font-semibold
-    text-[100px]
-    text-white dark:text-foreground/20
-    leading-[0.9]
-    select-none
-    pointer-events-none
-    z-10
-    font-heading
-  "
-                animate={{ y: [0, -6, 0] }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1.2, delay: 0.2 }}
+                className={`w-64 h-64 md:w-96 md:h-96 rounded-[4rem] overflow-hidden border-2 shadow-3xl relative z-10 ${
+                  isDark
+                    ? "bg-zinc-900 border-white/10"
+                    : "bg-white border-zinc-200"
+                }`}
               >
-                <div>FULLSTACK</div>
-                <div>ENGINEER</div>
-              </motion.div>
-
-              {/* Profile Image - Above text */}
-              <div className="relative z-20">
                 <img
-                  src="/banner-user-image-one.webp"
-                  alt="Profile"
-                  className="h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px]
-               w-auto object-contain object-bottom"
+                  src="https://picsum.photos/800/800?grayscale"
+                  alt="Operator"
+                  className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000 grayscale"
                 />
-              </div>
-
-              {/* Floating Text Elements - Bottom (Over lower body) */}
-              <motion.div
-                className="
-    absolute bottom-32 md:bottom-40 lg:bottom-16
-    left-[70px] right-0
-    text-[64px] md:text-[90px] lg:text-[120px]
-    font-extrabold
-    select-none
-    leading-[0.85]
-    dark:text-foreground/20
-    text-center
-    pointer-events-none
-    z-30
-
-    text-white
-  "
-                animate={{ y: [0, -6, 0] }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <div>FRONTEND</div>
-                <div>ENGINEER</div>
               </motion.div>
             </div>
+          </div>
+
+          {/* Foreground Layer 2: Massive Text Overlay */}
+          <motion.div
+            className={`absolute bottom-[15%] right-0 font-black leading-none opacity-[0.04] pointer-events-none select-none z-20 ${isDark ? "text-white" : "text-black"}`}
+            style={{ fontSize: "10vw" }}
+            animate={{ y: [0, 15, 0] }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          >
+            ENGINEER
           </motion.div>
+
+          {/* Kinetic HUD Details */}
         </div>
+      </div>
+
+      {/* Aesthetic Bottom Border */}
+      <div
+        className={`absolute bottom-0 left-0 right-0 h-1 transition-all ${isDark ? "bg-white/5" : "bg-black/5"}`}
+      >
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 2, ease: "circOut" }}
+          className="h-full bg-blue-500/30"
+        />
       </div>
     </section>
   );
 };
 
-export default HeroSection;
+export default HeroPage;
