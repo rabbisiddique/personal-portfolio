@@ -197,7 +197,7 @@ const ProjectsPage = () => {
         }`}
       >
         <motion.button
-          onClick={() => router.push("/ai-labs")}
+          onClick={() => router.push("/experience")}
           whileHover={{ x: -8 }}
           className={`flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.5em] ${
             isDark
@@ -295,24 +295,6 @@ const ProjectsPage = () => {
       </div>
 
       {/* Return Button */}
-      <footer className="mt-32 flex flex-col items-center pb-20">
-        <motion.button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          whileHover={{ y: -5 }}
-          className={`flex flex-col items-center gap-4 text-[9px] font-black uppercase tracking-[1em] transition-all ${
-            isDark
-              ? "text-zinc-600 hover:text-white"
-              : "text-zinc-400 hover:text-black"
-          }`}
-        >
-          <ChevronRight
-            size={20}
-            className="-rotate-90 text-blue-500"
-            strokeWidth={3}
-          />
-          Top_Of_System
-        </motion.button>
-      </footer>
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

@@ -3,7 +3,6 @@ import { EDUCATION_ROADMAP, EXPERIENCE_ROADMAP } from "@/data/experience.data";
 import { motion } from "framer-motion";
 import {
   Activity,
-  ArrowRight,
   ChevronLeft,
   Code2,
   Cpu,
@@ -13,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ExperienceNode } from "../../../../types";
 
@@ -222,7 +222,7 @@ const TimelineCard = ({
 const ExperiencePage = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
+  const router = useRouter();
   return (
     <div
       className={`relative min-h-screen pb-32 overflow-x-hidden ${
@@ -260,6 +260,7 @@ const ExperiencePage = () => {
         }`}
       >
         <motion.button
+          onClick={() => router.push("/projects")}
           whileHover={{ x: -6 }}
           className={`flex items-center gap-3 text-sm font-black uppercase tracking-[0.3em] transition-colors ${
             isDark
@@ -475,24 +476,6 @@ const ExperiencePage = () => {
           </div>
         </section>
       </main>
-
-      <footer className="mt-60 border-t border-current/5 py-32 text-center relative overflow-hidden">
-        <motion.button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          whileHover={{ y: -10 }}
-          className={`relative z-10 flex flex-col items-center gap-6 text-[10px] font-black uppercase tracking-[1.5em] transition-all opacity-40 hover:opacity-100`}
-        >
-          {/* Fix: Using 'ArrowRight' which is imported, with -rotate-45 to point it up-right */}
-          <ArrowRight
-            size={24}
-            className="-rotate-45 mb-2 text-blue-500"
-            strokeWidth={3}
-          />
-          BACK_TO_TOP
-        </motion.button>
-        {/* Footer UI Fluff */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
-      </footer>
 
       <style>{`
         .animate-spin-slow { animation: spin 8s linear infinite; }
