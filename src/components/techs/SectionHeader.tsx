@@ -36,7 +36,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <h2
-          className={`text-7xl md:text-9xl font-black tracking-tighter font-space leading-[0.8] transition-colors ${
+          className={`text-7xl md:text-6xl font-black tracking-tighter font-space leading-[0.8] transition-colors ${
             isDark ? "text-white" : "text-zinc-900"
           }`}
         >

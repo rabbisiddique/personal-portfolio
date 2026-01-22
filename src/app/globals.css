@@ -273,6 +273,15 @@
     display: none;
   }
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Custom scrollbar styling */
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
@@ -293,32 +302,58 @@
 }
 
 .font-space {
-  font-family: "Space+Grotesk", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
 }
 
-/* Standard Scrollbar */
+/* Dark Mode Scrollbar Styles */
+:root {
+  color-scheme: light dark;
+}
+
+/* Light Mode Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #d4d4d4;
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #a3a3a3;
+  background-clip: padding-box;
 }
 
-/* Utility to hide scrollbars professionally */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
+/* Dark Mode Scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+  background-clip: padding-box;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d4 transparent;
+}
+
+.dark * {
+  scrollbar-color: #3f3f46 transparent;
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;

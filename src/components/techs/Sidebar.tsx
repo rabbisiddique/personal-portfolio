@@ -21,9 +21,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const isDark = theme === "dark";
   return (
     <div
-      className={`w-full lg:w-[500px] lg:h-screen lg:sticky lg:top-0 border-r p-12 flex flex-col justify-between z-30 backdrop-blur-3xl shadow-2xl transition-all duration-700 overflow-y-auto no-scrollbar ${
-        isDark ? "bg-zinc-950/80 border-white/5" : "bg-white/70 border-zinc-200"
-      }`}
+      className={`w-full lg:w-[450px] lg:h-screen lg:sticky lg:top-0 border-r p-12 flex flex-col justify-between z-30
+         backdrop-blur-3xl shadow-2xl transition-all duration-700  ${
+           isDark
+             ? "bg-zinc-950/80 border-white/5"
+             : "bg-white/70 border-zinc-200"
+         }`}
     >
       <div className="relative">
         {/* Logo Area */}
@@ -67,15 +70,16 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-4 mb-2">
                 <span
-                  className={`text-6xl md:text-8xl font-black tracking-tighter leading-none transition-all duration-700 font-space ${
-                    activeTab === idx
-                      ? isDark
-                        ? "text-white"
-                        : "text-zinc-900"
-                      : isDark
-                        ? "text-zinc-800 group-hover:text-zinc-600"
-                        : "text-zinc-200 group-hover:text-zinc-400"
-                  }`}
+                  className={`text-6xl md:text-5xl font-black tracking-tighter leading-none
+                     transition-all duration-700 font-space ${
+                       activeTab === idx
+                         ? isDark
+                           ? "text-white"
+                           : "text-zinc-900"
+                         : isDark
+                           ? "text-zinc-800 group-hover:text-zinc-600"
+                           : "text-zinc-200 group-hover:text-zinc-400"
+                     }`}
                 >
                   {cat.title}
                 </span>

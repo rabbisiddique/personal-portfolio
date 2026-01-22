@@ -86,7 +86,9 @@ const Tooltip: React.FC<{ children: React.ReactNode; label: string }> = ({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 10, scale: 0.8 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute right-full mr-5 px-3 py-1.5 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-lg text-white text-[11px] font-semibold uppercase tracking-wider shadow-2xl pointer-events-none z-[60] flex items-center gap-2"
+            className="absolute right-full mr-5 px-3 py-1.5 bg-zinc-900/90 backdrop-blur-xl border
+             border-white/10 rounded-lg text-white text-[11px] font-semibold uppercase tracking-wider
+              shadow-2xl pointer-events-none z-[60] flex items-center gap-2 w-[max-content] whitespace-nowrap"
           >
             <div className="w-1 h-1 bg-indigo-500 rounded-full animate-pulse" />
             {label}
@@ -115,7 +117,9 @@ const ScrollProgressButton: React.FC<{ onClick: () => void }> = ({
         <Magnetic>
           <button
             onClick={onClick}
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-zinc-900/40 backdrop-blur-md border border-white/5 hover:border-white/20 transition-all shadow-2xl group/up relative overflow-hidden"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-zinc-200
+             dark:bg-zinc-900/40 backdrop-blur-md border border-white/5 hover:border-white/20
+              transition-all shadow-2xl group/up relative overflow-hidden"
           >
             {/* SVG Progress Ring */}
             <svg
@@ -143,7 +147,7 @@ const ScrollProgressButton: React.FC<{ onClick: () => void }> = ({
                 className="text-indigo-500"
               />
             </svg>
-            <ArrowUp className="w-4 h-4 text-zinc-400 group-hover/up:text-white transition-transform duration-300 group-hover/up:-translate-y-1 z-10" />
+            <ArrowUp className="w-4 h-4  dark:text-zinc-400 text-gray-500 dark:group-hover/up:text-white group-hover/up:text-black transition-transform duration-300 group-hover/up:-translate-y-1 z-10" />
           </button>
         </Magnetic>
       </Tooltip>
@@ -163,7 +167,7 @@ const FloatingSidebar: React.FC = () => {
     {
       icon: Sparkles,
       label: "AI Labs",
-      href: "/ai-features",
+      href: "/ai-labs",
       isHighlight: true,
     },
     { icon: Briefcase, label: "Work", href: "/experience" },
@@ -228,7 +232,7 @@ const FloatingSidebar: React.FC = () => {
                           className="relative w-12 h-12 flex items-center justify-center rounded-2xl group/btn transition-all duration-300 hover:bg-white/5 active:scale-90"
                         >
                           <Icon
-                            className="w-[1.2rem] h-[1.2rem] text-zinc-500 transition-colors  group-hover/btn:text-white"
+                            className="w-[1.2rem] h-[1.2rem] text-zinc-500 transition-colors  dark:group-hover/btn:text-white group-hover/btn:text-black"
                             strokeWidth={1.5}
                           />
                         </button>

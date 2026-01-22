@@ -4,7 +4,6 @@
 import FloatingSidebar from "@/components/public/FloatingSidebar";
 import PageTransition from "@/components/public/PageTransition";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AnimatePresence } from "framer-motion";
 
 export default function ClientLayoutWrapper({
   children,
@@ -17,9 +16,7 @@ export default function ClientLayoutWrapper({
         <FloatingSidebar />
       </div>
 
-      <AnimatePresence mode="wait">
-        <PageTransition>{children}</PageTransition>
-      </AnimatePresence>
+      <PageTransition>{children}</PageTransition>
     </ThemeProvider>
   );
 }

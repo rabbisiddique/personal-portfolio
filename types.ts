@@ -38,6 +38,7 @@ export interface Project {
   links: {
     github?: string;
     demo?: string;
+    video?: string;
   };
 }
 
@@ -52,4 +53,15 @@ export interface ExperienceNode {
   achievements: string[];
   icon: LucideIcon;
   accent: string;
+}
+
+export interface LabExperiment {
+  id: string;
+  title: string;
+  model: string;
+  description: string;
+  complexity: number;
+  status: "Idle" | "Processing" | "Stable";
+  accent: string;
+  tags: string[];
 }

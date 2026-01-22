@@ -31,7 +31,6 @@ export default function RootLayout({
     <html
       lang="en"
       className={`dark ${poppins.variable} ${inter.variable} ${roboto.variable}`}
-      suppressHydrationWarning
     >
       <body
         className="
@@ -40,6 +39,7 @@ export default function RootLayout({
           text-foreground-light dark:text-foreground-dark
           font-body
         "
+        suppressHydrationWarning
       >
         {/* Everything client-side goes inside here */}
         <ClientLayoutWrapper>{children}</ClientLayoutWrapper>

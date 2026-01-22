@@ -3,50 +3,66 @@ import { Project } from "../../types";
 export const PROJECTS: Project[] = [
   {
     id: "nexus-v1",
-    title: "Nexus Core v1",
-    category: "Infrastucture",
+    title: "NEXUS CORE_SYSTEM",
+    category: "Infrastructure",
     description:
-      "A high-performance system monitoring dashboard with real-time biometric synchronization and neural processing simulation.",
-    techStack: ["React", "TypeScript", "Framer Motion", "Tailwind"],
+      "A high-performance biometric dashboard featuring real-time neural processing simulation for decentralized edge networks.",
+    techStack: ["React", "WebGL", "Framer", "Rust"],
     image:
-      "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200",
     stats: [
-      { label: "Stability", value: "99.9%" },
-      { label: "Throughput", value: "2.4 GB/s" },
+      { label: "Sync_Rate", value: "0.02ms" },
+      { label: "Throughput", value: "4.2 TB/s" },
     ],
     status: "Deployed",
-    links: { github: "#", demo: "#" },
+    links: { github: "https://github.com", demo: "https://demo.com" },
   },
   {
     id: "synapse-ai",
-    title: "Synapse AI",
-    category: "Neural Net",
+    title: "SYNAPSE NEURAL_HUB",
+    category: "AI Laboratory",
     description:
-      "Decentralized AI inference engine capable of processing vector embeddings at sub-10ms latency across edge nodes.",
-    techStack: ["Python", "Next.js", "Pinecone", "NestJS"],
+      "Advanced inference engine processing vector embeddings across globally distributed nodes with zero-trust verification.",
+    techStack: ["Next.js", "PyTorch", "Pinecone", "GRPC"],
     image:
-      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1200",
     stats: [
-      { label: "Inference", value: "8.2ms" },
-      { label: "Accuracy", value: "94.5%" },
+      { label: "Inference", value: "12.4ms" },
+      { label: "Confidence", value: "98.2%" },
     ],
     status: "Active",
-    links: { github: "#" },
+    links: { github: "https://github.com" },
   },
   {
     id: "matrix-db",
-    title: "Matrix DB",
-    category: "Persistence",
+    title: "MATRIX VAULT_V2",
+    category: "Security",
     description:
-      "High-concurrency document storage solution optimized for distributed blockchain data verification and real-time state sync.",
-    techStack: ["Go", "PostgreSQL", "Redis", "Docker"],
+      "Encrypted document storage architecture utilizing sharded blockchain states for immutable audit trails.",
+    techStack: ["Go", "Solidity", "IPFS", "Docker"],
     image:
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=1200",
     stats: [
-      { label: "Conn Count", value: "250k+" },
-      { label: "Sync Latency", value: "1.2ms" },
+      { label: "Uptime", value: "99.99%" },
+      { label: "Encryption", value: "AES-512" },
     ],
     status: "Beta",
-    links: { demo: "#" },
+    links: { demo: "https://demo.com", github: "https://github.com" },
+  },
+  {
+    id: "mongo-db",
+    title: "MONGO VAULT_V2",
+    category: "Security",
+    description:
+      "Encrypted document storage architecture utilizing sharded blockchain states for immutable audit trails.",
+    techStack: ["Go", "Solidity", "IPFS", "Docker"],
+    image:
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=1200",
+    stats: [
+      { label: "Uptime", value: "99.99%" },
+      { label: "Encryption", value: "AES-512" },
+    ],
+    status: "Beta",
+    links: { demo: "https://demo.com", github: "https://github.com" },
   },
 ];
