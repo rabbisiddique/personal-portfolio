@@ -1,63 +1,111 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import React from "react";
+import { useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl";
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = "2xl",
+}) => {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  const maxWidthClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "4xl": "max-w-4xl",
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-12 overflow-hidden">
+        <>
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="absolute inset-0 bg-white/60 dark:bg-black/80 backdrop-blur-2xl"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9998]"
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 400 }}
-            className="relative w-full max-w-2xl bg-card border border-border rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-8 border-b border-border bg-muted/30">
-              <div className="space-y-1">
-                <h2 className="text-xl font-black uppercase text-foreground">
-                  {title}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-[10px] font-mono font-bold uppercase opacity-40">
-                    System_Directive
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-3 rounded-2xl transition-all border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground shadow-sm"
+
+          {/* Modal Container */}
+          <div className="fixed inset-0 z-[9999] overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className={`relative w-full ${maxWidthClasses[maxWidth]} 
+                bg-background/95 backdrop-blur-xl 
+                border border-border rounded-2xl shadow-2xl 
+                overflow-hidden`}
+                onClick={(e) => e.stopPropagation()}
               >
-                <X size={20} />
-              </button>
-            </div>
+                {/* Gradient overlay for visual depth */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent pointer-events-none" />
 
-            {/* Content */}
-            <div className="p-10 overflow-y-auto custom-scrollbar flex-1">
-              {children}
-            </div>
+                {/* Header */}
+                <div className="relative z-10 flex items-center justify-between px-6 py-5 border-b border-border bg-muted/30">
+                  <h2 className="text-lg font-bold text-foreground">{title}</h2>
 
-            {/* Footer Accent */}
-            <div className="h-2 w-full bg-foreground/5" />
-          </motion.div>
-        </div>
+                  <motion.button
+                    onClick={onClose}
+                    className="p-2 rounded-lg text-muted-foreground 
+                    hover:text-foreground hover:bg-muted/50 
+                    transition-all"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X size={20} />
+                  </motion.button>
+                </div>
+
+                {/* Content */}
+                <div className="relative z-10 px-6 py-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+                  {children}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </>
       )}
     </AnimatePresence>
   );
