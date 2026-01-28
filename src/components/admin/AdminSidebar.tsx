@@ -139,7 +139,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 animate="open"
                 exit="collapsed"
               >
-                <h1 className="text-lg font-bold tracking-tight">Lumina</h1>
+                <h1 className="text-lg font-bold tracking-tight">Siddique</h1>
                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
                   Admin Studio
                 </p>

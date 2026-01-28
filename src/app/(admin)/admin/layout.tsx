@@ -15,6 +15,19 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  // Check if current page is login
+  const isLoginPage = pathname === "/admin/login" || pathname === "/login";
+
+  // If it's login page, render without sidebar and header
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
+        {children}
+      </div>
+    );
+  }
+
+  // Regular admin layout with sidebar and header
   return (
     <div className="min-h-screen flex bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
       <AdminSidebar

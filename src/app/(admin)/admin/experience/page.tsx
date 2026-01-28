@@ -1,5 +1,10 @@
 "use client";
 import Modal from "@/components/reuse/Modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -26,6 +31,7 @@ import {
   MOCK_EXPERIENCE_LIST,
 } from "../../../../../constants";
 
+// Your form component
 const iconMap: Record<string, LucideIcon> = {
   Briefcase,
   GraduationCap,
@@ -306,174 +312,175 @@ const AdminExperiencePage: React.FC = () => {
             ? `Edit ${activeTab === "work" ? "Experience" : "Education"}`
             : `Add ${activeTab === "work" ? "Experience" : "Education"}`
         }
-        maxWidth="2xl"
+        maxWidth="4xl"
       >
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Basic Information */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Basic Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  {activeTab === "work"
-                    ? "Company / Organization"
-                    : "Institution"}
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingItem.item?.title}
-                  placeholder={
-                    activeTab === "work"
-                      ? "e.g., Tech Corp"
-                      : "e.g., University Name"
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
+        <div className="flex flex-col h-full max-h-[80vh]">
+          {/* Scrollable form content */}
+          <div className="flex-1 overflow-y-auto px-1">
+            <form className="space-y-6 pb-6" onSubmit={handleSubmit}>
+              {/* Basic Information */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4">
+                  Basic Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">
+                      {activeTab === "work"
+                        ? "Company / Organization"
+                        : "Institution"}
+                    </Label>
+                    <Input
+                      id="title"
+                      type="text"
+                      defaultValue={editingItem.item?.title}
+                      placeholder={
+                        activeTab === "work"
+                          ? "e.g., Tech Corp"
+                          : "e.g., University Name"
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">
+                      {activeTab === "work"
+                        ? "Position / Role"
+                        : "Degree / Program"}
+                    </Label>
+                    <Input
+                      id="role"
+                      type="text"
+                      defaultValue={editingItem.item?.role}
+                      placeholder={
+                        activeTab === "work"
+                          ? "e.g., Senior Developer"
+                          : "e.g., Bachelor of Science"
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  {activeTab === "work"
-                    ? "Position / Role"
-                    : "Degree / Program"}
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingItem.item?.role}
-                  placeholder={
-                    activeTab === "work"
-                      ? "e.g., Senior Developer"
-                      : "e.g., Bachelor of Science"
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Timeline & Visual */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar size={16} className="text-primary" />
-              <h3 className="text-sm font-bold text-foreground">
-                Timeline & Visual
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Time Period
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingItem.item?.period}
-                  placeholder="Jan 2024 - Present"
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              {/* Timeline & Visual */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <div className="flex items-center gap-2 mb-4">
+                  <Calendar size={16} className="text-primary" />
+                  <h3 className="text-sm font-bold text-foreground">
+                    Timeline & Visual
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="period">Time Period</Label>
+                    <Input
+                      id="period"
+                      type="text"
+                      defaultValue={editingItem.item?.period}
+                      placeholder="Jan 2024 - Present"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">Icon Name</Label>
+                    <Input
+                      id="icon"
+                      type="text"
+                      defaultValue={editingItem.item?.icon}
+                      placeholder="Briefcase, GraduationCap, Code"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="accent">Accent Color</Label>
+                    <Input
+                      id="accent"
+                      type="color"
+                      defaultValue={editingItem.item?.accent || "#3b82f6"}
+                      className="h-10 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4">
+                  Description
+                </h3>
+                <Textarea
+                  id="description"
+                  defaultValue={editingItem.item?.description}
+                  placeholder="Describe your responsibilities, achievements, or what you learned..."
+                  rows={4}
+                  className="resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Icon Name
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingItem.item?.icon}
-                  placeholder="Briefcase, GraduationCap, Code"
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
+
+              {/* Skills */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <div className="flex items-center gap-2 mb-4">
+                  <Tag size={16} className="text-primary" />
+                  <h3 className="text-sm font-bold text-foreground">
+                    Skills & Technologies
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    id="skills"
+                    type="text"
+                    defaultValue={editingItem.item?.skills.join(", ")}
+                    placeholder="React, Node.js, TypeScript (comma-separated)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Separate skills with commas
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Accent Color
-                </label>
-                <input
-                  type="color"
-                  defaultValue={editingItem.item?.accent || "#3b82f6"}
-                  className="w-full h-10 rounded-lg cursor-pointer border border-border bg-background"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Description */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Description
-            </h3>
-            <textarea
-              defaultValue={editingItem.item?.description}
-              placeholder="Describe your responsibilities, achievements, or what you learned..."
-              rows={4}
-              className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-            />
-          </div>
-
-          {/* Skills */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <div className="flex items-center gap-2 mb-4">
-              <Tag size={16} className="text-primary" />
-              <h3 className="text-sm font-bold text-foreground">
-                Skills & Technologies
-              </h3>
-            </div>
-            <input
-              type="text"
-              defaultValue={editingItem.item?.skills.join(", ")}
-              placeholder="React, Node.js, TypeScript (comma-separated)"
-              className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Separate skills with commas
-            </p>
-          </div>
-
-          {/* Status */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">Status</h3>
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
+              {/* Status */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4">
+                  Status
+                </h3>
+                <RadioGroup
+                  defaultValue={editingItem.item?.status || "active"}
                   name="status"
-                  value="active"
-                  defaultChecked={editingItem.item?.status === "active"}
-                  className="w-4 h-4 text-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <span className="text-sm text-foreground">
-                  Currently Active
-                </span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value="past"
-                  defaultChecked={editingItem.item?.status !== "active"}
-                  className="w-4 h-4 text-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <span className="text-sm text-foreground">Past Position</span>
-              </label>
-            </div>
+                  className="flex items-center gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="active" id="status-active" />
+                    <Label
+                      htmlFor="status-active"
+                      className="font-normal cursor-pointer"
+                    >
+                      Currently Active
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="past" id="status-past" />
+                    <Label
+                      htmlFor="status-past"
+                      className="font-normal cursor-pointer"
+                    >
+                      Past Position
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </form>
           </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <button
+          {/* Form Actions - Sticky Footer */}
+          <div className="flex-shrink-0 flex justify-end gap-3 pt-4 pb-2 px-1 border-t border-border bg-background">
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingItem({ item: null, type: activeTab });
               }}
-              className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
+            </Button>
+            <Button type="submit" disabled={isUpdating}>
               {isUpdating ? (
                 <>
                   <Activity size={16} className="animate-spin" />
@@ -485,9 +492,9 @@ const AdminExperiencePage: React.FC = () => {
                   {editingItem.item ? "Update Entry" : "Add Entry"}
                 </>
               )}
-            </button>
+            </Button>
           </div>
-        </form>
+        </div>
       </Modal>
 
       {/* Success Toast */}
