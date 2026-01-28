@@ -1,8 +1,6 @@
 // app/ClientLayoutWrapper.tsx
 "use client";
 
-import FloatingSidebar from "@/components/public/FloatingSidebar";
-import PageTransition from "@/components/public/PageTransition";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function ClientLayoutWrapper({
@@ -12,11 +10,7 @@ export default function ClientLayoutWrapper({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <div className="relative">
-        <FloatingSidebar />
-      </div>
-
-      <PageTransition>{children}</PageTransition>
+      <main>{children}</main>
     </ThemeProvider>
   );
 }

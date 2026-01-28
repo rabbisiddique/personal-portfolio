@@ -115,40 +115,47 @@ const ScrollProgressButton: React.FC<{ onClick: () => void }> = ({
     <motion.div style={{ opacity, scale }} className="relative group">
       <Tooltip label="Back to Top">
         <Magnetic>
-          <button
-            onClick={onClick}
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-zinc-200
-             dark:bg-zinc-900/40 backdrop-blur-md border border-white/5 hover:border-white/20
-              transition-all shadow-2xl group/up relative overflow-hidden"
-          >
-            {/* SVG Progress Ring */}
-            <svg
-              className="absolute inset-0 w-full h-full -rotate-90 p-1"
-              viewBox="0 0 100 100"
+          <div onClick={onClick} className="cursor-pointer">
+            <button
+              type="button"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-zinc-200
+          dark:bg-zinc-900/40 backdrop-blur-md border border-white/5 hover:border-white/20
+          transition-all shadow-2xl group/up relative overflow-hidden"
             >
-              <circle
-                cx="50"
-                cy="50"
-                r="46"
-                stroke="currentColor"
-                strokeWidth="2"
-                fill="transparent"
-                className="text-white/5"
+              {/* SVG Progress Ring */}
+              <svg
+                className="absolute inset-0 w-full h-full -rotate-90 p-1 pointer-events-none"
+                viewBox="0 0 100 100"
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="46"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="transparent"
+                  className="text-white/5"
+                />
+                <motion.circle
+                  cx="50"
+                  cy="50"
+                  r="46"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="transparent"
+                  strokeDasharray="0 1"
+                  style={{ pathLength }}
+                  className="text-indigo-500"
+                />
+              </svg>
+
+              <ArrowUp
+                className="w-4 h-4 z-10 dark:text-zinc-400 text-gray-500
+          dark:group-hover/up:text-white group-hover/up:text-black
+          transition-transform duration-300 group-hover/up:-translate-y-1"
               />
-              <motion.circle
-                cx="50"
-                cy="50"
-                r="46"
-                stroke="currentColor"
-                strokeWidth="3"
-                fill="transparent"
-                strokeDasharray="0 1"
-                style={{ pathLength }}
-                className="text-indigo-500"
-              />
-            </svg>
-            <ArrowUp className="w-4 h-4  dark:text-zinc-400 text-gray-500 dark:group-hover/up:text-white group-hover/up:text-black transition-transform duration-300 group-hover/up:-translate-y-1 z-10" />
-          </button>
+            </button>
+          </div>
         </Magnetic>
       </Tooltip>
     </motion.div>
@@ -228,11 +235,14 @@ const FloatingSidebar: React.FC = () => {
                     <Magnetic>
                       {isModal ? (
                         <button
+                          type="button"
                           onClick={() => setIsSettingsOpen(true)}
-                          className="relative w-12 h-12 flex items-center justify-center rounded-2xl group/btn transition-all duration-300 hover:bg-white/5 active:scale-90"
+                          className="relative w-12 h-12 flex items-center justify-center rounded-2xl
+                 transition-all duration-300 hover:bg-white/5 active:scale-90"
                         >
                           <Icon
-                            className="w-[1.2rem] h-[1.2rem] text-zinc-500 transition-colors  dark:group-hover/btn:text-white group-hover/btn:text-black"
+                            className="w-[1.2rem] h-[1.2rem] text-zinc-500
+                   dark:group-hover/btn:text-white group-hover/btn:text-black"
                             strokeWidth={1.5}
                           />
                         </button>
@@ -292,7 +302,10 @@ const FloatingSidebar: React.FC = () => {
         </motion.nav>
 
         <ScrollProgressButton
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => {
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+          }}
         />
       </div>
 
