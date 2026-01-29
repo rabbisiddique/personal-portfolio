@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, LogOut, Zap } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 interface AdminSidebarProps {
@@ -12,6 +12,7 @@ interface AdminSidebarProps {
   collapsible?: boolean;
 }
 
+import { supabase } from "@/lib/supabase/client";
 import {
   BarChart3,
   Calendar,
@@ -21,6 +22,7 @@ import {
   ShoppingCart,
   Users,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const NAV_ITEMS = [
   {
@@ -67,6 +69,19 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error(error.message);
+      }
+      router.push("/login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const sidebarVariants = {
     open: { width: "16rem", transition: { duration: 0.3, ease: "easeInOut" } },
@@ -290,6 +305,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             transition-all group ${isCollapsed ? "justify-center" : ""}`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={handleSignOut}
           >
             <motion.div whileHover={{ rotate: -10 }}>
               <LogOut size={18} />

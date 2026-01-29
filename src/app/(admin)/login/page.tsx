@@ -1,20 +1,46 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { LoginAction } from "@/action/admin.action";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, Shield, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ email, password });
+    setIsLoading(true);
+
+    try {
+      const res = await LoginAction({ email, password });
+      console.log(res);
+
+      if (!res.success || !res.data?.session) {
+        // Show error message
+        toast.error(res.message || "Login failed. Please try again.");
+      } else {
+        // Success case
+        toast.success(res.message || "Login successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/admin");
+        }, 500);
+      }
+    } catch (error) {
+      // Show error toast for unexpected errors
+      toast.error("Something went wrong. Please try again later.");
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,7 +164,7 @@ const AdminLogin = () => {
               </div>
 
               {/* Submit button */}
-              <Button
+              {/* <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 
                 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 
@@ -148,7 +174,14 @@ const AdminLogin = () => {
                   <Sparkles size={18} />
                   Sign In
                 </span>
-              </Button>
+              </Button> */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50 hover:bg-primary/90 transition-colors"
+              >
+                {isLoading ? "Logging in..." : "Login"}
+              </button>
             </form>
 
             {/* Footer text */}

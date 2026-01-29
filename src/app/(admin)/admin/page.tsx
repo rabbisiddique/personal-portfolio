@@ -1,10 +1,14 @@
 "use client";
 import Modal from "@/components/reuse/Modal";
+import Toast from "@/components/reuse/Toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   AlertCircle,
-  CheckCircle,
   Edit3,
   Eye,
   Image as ImageIcon,
@@ -15,7 +19,6 @@ import {
 import React, { useEffect, useState } from "react";
 import { HeroData } from "../../../../admin.types";
 import { MOCK_HERO_DATA } from "../../../../constants";
-
 const AdminHeroPage: React.FC = () => {
   const [data, setData] = useState<HeroData>(MOCK_HERO_DATA);
   const [roleIndex, setRoleIndex] = useState(0);
@@ -249,232 +252,296 @@ const AdminHeroPage: React.FC = () => {
         title="Edit Hero Section"
         maxWidth="4xl"
       >
-        <form className="space-y-6" onSubmit={handleUpdate}>
-          {/* Identity Section */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <User size={16} className="text-primary" />
-              Identity Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={data.identity.firstName}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      identity: { ...data.identity, firstName: e.target.value },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={data.identity.lastName}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      identity: { ...data.identity, lastName: e.target.value },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  System Label
-                </label>
-                <input
-                  type="text"
-                  value={data.identity.systemLabel}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      identity: {
-                        ...data.identity,
-                        systemLabel: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Connection Text
-                </label>
-                <input
-                  type="text"
-                  value={data.identity.connectionText}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      identity: {
-                        ...data.identity,
-                        connectionText: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Roles Section */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <Type size={16} className="text-primary" />
-              Roles & Description
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Rotating Roles
-                </label>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {data.summary.roles.map((role, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-lg group"
-                    >
-                      <input
-                        type="text"
-                        value={role}
-                        onChange={(e) => updateRole(idx, e.target.value)}
-                        className="bg-transparent text-xs font-medium outline-none w-28 text-foreground"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeRole(idx)}
-                        className="text-destructive opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addRole}
-                    className="px-3 py-1.5 border border-dashed border-border rounded-lg text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
-                  >
-                    + Add Role
-                  </button>
+        <div className="flex flex-col h-full max-h-[85vh]">
+          {/* Scrollable form content */}
+          <div className="flex-1 overflow-y-auto px-1">
+            <form className="space-y-6 pb-6" onSubmit={handleUpdate}>
+              {/* Identity Section */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <User size={16} className="text-primary" />
+                  Identity Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      value={data.identity.firstName}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          identity: {
+                            ...data.identity,
+                            firstName: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      value={data.identity.lastName}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          identity: {
+                            ...data.identity,
+                            lastName: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="systemLabel">System Label</Label>
+                    <Input
+                      id="systemLabel"
+                      type="text"
+                      value={data.identity.systemLabel}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          identity: {
+                            ...data.identity,
+                            systemLabel: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="connectionText">Connection Text</Label>
+                    <Input
+                      id="connectionText"
+                      type="text"
+                      value={data.identity.connectionText}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          identity: {
+                            ...data.identity,
+                            connectionText: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={data.summary.description}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      summary: { ...data.summary, description: e.target.value },
-                    })
-                  }
-                  rows={4}
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                />
+
+              {/* Roles Section */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Type size={16} className="text-primary" />
+                  Roles & Description
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Rotating Roles</Label>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {data.summary.roles.map((role, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-lg group"
+                        >
+                          <input
+                            type="text"
+                            value={role}
+                            onChange={(e) => updateRole(idx, e.target.value)}
+                            className="bg-transparent text-xs font-medium outline-none w-28 text-foreground"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeRole(idx)}
+                            className="text-destructive opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addRole}
+                        className="px-3 py-1.5 border border-dashed border-border rounded-lg text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
+                      >
+                        + Add Role
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={data.summary.description}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          summary: {
+                            ...data.summary,
+                            description: e.target.value,
+                          },
+                        })
+                      }
+                      rows={4}
+                      className="resize-none"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+
+              {/* Visual & CTA Section */}
+              <div className="bg-muted/30 rounded-xl p-6 border border-border">
+                <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <ImageIcon size={16} className="text-primary" />
+                  Visual Assets & CTA
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryButton">Primary Button Text</Label>
+                    <Input
+                      id="primaryButton"
+                      type="text"
+                      value={data.cta.primaryButtonText}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          cta: {
+                            ...data.cta,
+                            primaryButtonText: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="profileImage">Profile Image</Label>
+                    <div className="space-y-3">
+                      {/* Image Preview */}
+                      {data.visuals.profileImageUrl && (
+                        <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
+                          <img
+                            src={data.visuals.profileImageUrl}
+                            alt="Profile preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setData({
+                                ...data,
+                                visuals: {
+                                  ...data.visuals,
+                                  profileImageUrl: "",
+                                },
+                              })
+                            }
+                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-destructive/90"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+
+                      {/* File Input */}
+                      <div className="flex gap-2">
+                        <Input
+                          id="profileImage"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setData({
+                                  ...data,
+                                  visuals: {
+                                    ...data.visuals,
+                                    profileImageUrl: reader.result as string,
+                                  },
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+
+                      {/* Or URL Input */}
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">
+                            Or paste URL
+                          </span>
+                        </div>
+                      </div>
+
+                      <Input
+                        type="text"
+                        placeholder="https://example.com/image.jpg"
+                        value={data.visuals.profileImageUrl}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            visuals: {
+                              ...data.visuals,
+                              profileImageUrl: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bgTop">Background Text (Top)</Label>
+                    <Input
+                      id="bgTop"
+                      type="text"
+                      value={data.visuals.backgroundWordTop}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          visuals: {
+                            ...data.visuals,
+                            backgroundWordTop: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bgBottom">Background Text (Bottom)</Label>
+                    <Input
+                      id="bgBottom"
+                      type="text"
+                      value={data.visuals.backgroundWordBottom}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          visuals: {
+                            ...data.visuals,
+                            backgroundWordBottom: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
 
-          {/* Visual & CTA Section */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <ImageIcon size={16} className="text-primary" />
-              Visual Assets & CTA
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Primary Button Text
-                </label>
-                <input
-                  type="text"
-                  value={data.cta.primaryButtonText}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      cta: { ...data.cta, primaryButtonText: e.target.value },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Profile Image URL
-                </label>
-                <input
-                  type="text"
-                  value={data.visuals.profileImageUrl}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      visuals: {
-                        ...data.visuals,
-                        profileImageUrl: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Background Text (Top)
-                </label>
-                <input
-                  type="text"
-                  value={data.visuals.backgroundWordTop}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      visuals: {
-                        ...data.visuals,
-                        backgroundWordTop: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Background Text (Bottom)
-                </label>
-                <input
-                  type="text"
-                  value={data.visuals.backgroundWordBottom}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      visuals: {
-                        ...data.visuals,
-                        backgroundWordBottom: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-between items-center pt-4 border-t border-border">
+          {/* Sticky Footer - Form Actions */}
+          <div className="flex-shrink-0 flex justify-between items-center pt-4 pb-2 px-1 border-t border-border bg-background">
             <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertCircle size={16} />
               <span className="text-xs">
@@ -482,17 +549,17 @@ const AdminHeroPage: React.FC = () => {
               </span>
             </div>
             <div className="flex gap-3">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setIsModalOpen(false)}
-                className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={isUpdating}
-                className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+                onClick={handleUpdate}
               >
                 {isUpdating ? (
                   <>
@@ -505,38 +572,21 @@ const AdminHeroPage: React.FC = () => {
                     Save Changes
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
-        </form>
+        </div>
       </Modal>
 
       {/* Success Toast */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 right-6 z-[10000] bg-card border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 max-w-sm"
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle
-                size={20}
-                className="text-emerald-600 dark:text-emerald-400"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Changes saved
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Hero section updated successfully
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showToast && (
+        <Toast
+          type="success"
+          title="Changes saved"
+          description="Hero section updated successfully"
+          duration={3000} // auto hides after 3s
+        />
+      )}
     </div>
   );
 };
