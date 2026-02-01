@@ -15,29 +15,19 @@ export interface NavItem {
 }
 
 export interface HeroData {
-  identity: {
-    firstName: string;
-    lastName: string;
-    systemLabel: string;
-    connectionText: string;
-  };
-  summary: {
-    roles: string[];
-    description: string;
-  };
-  cta: {
-    primaryButtonText: string;
-    primaryButtonLink: string;
-  };
-  visuals: {
-    profileImageUrl: string;
-    profileImageAlt: string;
-    backgroundWordTop: string;
-    backgroundWordBottom: string;
-  };
-  config: {
-    theme: Theme;
-  };
+  first_name: string;
+  last_name: string;
+  system_label: string;
+  connection_text: string;
+
+  roles: string[];
+  description: string;
+  primary_buttonText: string;
+  primaryButtonLink: string;
+
+  profileImageUrl: string;
+  backgroundWordTop: string;
+  backgroundWordBottom: string;
 }
 
 export interface TechCategory {

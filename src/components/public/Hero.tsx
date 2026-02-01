@@ -12,6 +12,7 @@ const HeroPage = () => {
   const [scrollY, setScrollY] = useState(0);
   const controls = useAnimation();
   const router = useRouter();
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
