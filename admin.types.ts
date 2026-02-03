@@ -81,11 +81,11 @@ export interface Project {
 
 export interface AboutData {
   hero: {
-    firstName: string;
-    lastName: string;
-    roleTitle: string;
-    operatorLabel: string;
-    tagline: string;
+    first_name: string;
+    last_name: string;
+    role_title: string;
+    operator_label: string;
+    background_text: string;
     description: string;
   };
   systemStats: {
@@ -106,14 +106,10 @@ export interface AboutData {
     id: string;
     title: string;
     description: string;
+    extra_description: string;
     icon: string;
-    level: number;
+    level: string;
   }[];
-  systemLabels: {
-    biometricTitle: string;
-    expertiseTitle: string;
-    footerLabel: string;
-  };
 }
 
 export interface LabMessage {

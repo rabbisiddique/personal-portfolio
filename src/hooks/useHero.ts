@@ -1,6 +1,6 @@
 "use client";
 
-import { getHeroAction } from "@/action/hero.action";
+import { getHeroAction } from "@/action/admin/hero.action";
 import { supabase } from "@/lib/supabase/client";
 import { HeroFormData } from "@/schemas/hero.schema";
 import { useEffect, useState } from "react";

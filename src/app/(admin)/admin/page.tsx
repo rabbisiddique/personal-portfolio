@@ -1,5 +1,5 @@
 "use client";
-import { createHeroAction, updateHeroAction } from "@/action/hero.action";
+import { createHeroAction, updateHeroAction } from "@/action/admin/hero.action";
 import SkeletonHero from "@/components/admin/SkeletonHero";
 import Modal from "@/components/reuse/Modal";
 import { Button } from "@/components/ui/button";
