@@ -65,19 +65,23 @@ export interface TimelineEntry {
   status: "active" | "draft" | "archived";
 }
 
+export interface ProjectLinks {
+  live_link?: string;
+  github_link?: string;
+  video_link?: string;
+}
+
 export interface Project {
   id: string;
-  title: string;
+  project_title: string;
   description: string;
+  image_url: string;
   category: string;
-  image: string;
-  techStack: string[];
-  links: {
-    demo?: string;
-    github?: string;
-    video?: string;
-  };
+  tech_stack: string[];
+  links: ProjectLinks;
 }
+
+export type ViewMode = "grid" | "list";
 
 export interface AboutData {
   hero: {

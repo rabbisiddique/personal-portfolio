@@ -141,25 +141,106 @@ export const MOCK_TECHS: TechItem[] = [
 
 export const MOCK_PROJECTS: Project[] = [
   {
-    id: "p1",
-    title: "Nexus DeFi Pulse",
+    id: "1",
+    project_title: "Nebula Dashboard",
     description:
-      "Real-time decentralized finance monitoring system with neural forecasting.",
-    category: "Fintech / Web3",
-    image: "https://picsum.photos/seed/finance/800/450",
-    techStack: ["React", "D3.js", "Solidity", "Tailwind"],
-    links: { demo: "#", github: "#" },
+      "A comprehensive analytics dashboard for cloud infrastructure monitoring with real-time alerts.",
+    image_url: "https://picsum.photos/seed/nebula/800/600",
+    category: "SaaS",
+    tech_stack: ["React", "TypeScript", "D3.js", "Tailwind"],
+    links: {
+      live_link: "https://example.com",
+      github_link: "https://github.com/example/nebula",
+    },
   },
   {
-    id: "p2",
-    title: "CyberSentry Node",
+    id: "2",
+    project_title: "CryptoFlow",
     description:
-      "Automated network intrusion detection system using ML heuristics.",
-    category: "Security / AI",
-    image: "https://picsum.photos/seed/security/800/450",
-    techStack: ["Python", "TensorFlow", "FastAPI"],
-    links: { github: "#", video: "#" },
+      "Decentralized exchange platform supporting multi-chain swaps and liquidity mining protocols.",
+    image_url: "https://picsum.photos/seed/crypto/800/600",
+    category: "Web3",
+    tech_stack: ["Next.js", "Solidity", "Ethers.js"],
+    links: {
+      live_link: "https://example.com",
+      github_link: "https://github.com/example/cryptoflow",
+      video_link: "https://youtube.com/watch?v=example",
+    },
   },
+  {
+    id: "3",
+    project_title: "ZenSpace App",
+    description:
+      "Mental wellness application featuring guided meditation, sleep tracking, and personalized coaching.",
+    image_url: "https://picsum.photos/seed/zen/800/600",
+    category: "Mobile",
+    tech_stack: ["React Native", "Firebase", "Redux"],
+    links: {
+      github_link: "https://github.com/example/zenspace",
+    },
+  },
+];
+
+export const PROJECT_CATEGORIES = [
+  // Core Web
+  "Frontend",
+  "Backend",
+  "Full Stack",
+  "Web Application",
+  "Landing Page",
+
+  // Product & Platforms
+  "SaaS",
+  "Startup MVP",
+  "Enterprise Application",
+  "Internal Tool",
+  "Admin Dashboard",
+
+  // Domains
+  "E-commerce",
+  "Fintech",
+  "EdTech",
+  "HealthTech",
+  "PropTech",
+  "GovTech",
+  "TravelTech",
+  "LegalTech",
+  "HRTech",
+
+  // Emerging Tech
+  "AI / ML",
+  "Web3",
+  "Blockchain",
+  "AR / VR",
+
+  // Mobile & Desktop
+  "Mobile App",
+  "Cross-Platform App",
+  "Desktop App",
+  "PWA",
+
+  // Data & Infra
+  "Data Visualization",
+  "Analytics",
+  "DevOps",
+  "API / Microservices",
+
+  // UX / Design
+  "UI / UX",
+  "Design System",
+  "Animation / Motion",
+
+  // Media & Content
+  "CMS",
+  "Blog Platform",
+  "Portfolio Website",
+  "Marketing Website",
+
+  // Experiments
+  "Open Source",
+  "Side Project",
+  "Hackathon Project",
+  "Experimental",
 ];
 
 export const MOCK_ABOUT_DATA: AboutData = {
