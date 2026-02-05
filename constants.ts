@@ -86,6 +86,14 @@ export const MOCK_TECH_CATEGORIES: TechCategory[] = [
   },
 ];
 
+export const TECH_CATEGORIES = [
+  "Frontend",
+  "Backend",
+  "Data",
+  "DevOps",
+  "Stack",
+];
+
 export const MOCK_TECHS: TechItem[] = [
   {
     id: "t1",

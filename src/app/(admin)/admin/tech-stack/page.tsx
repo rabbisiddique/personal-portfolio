@@ -1,43 +1,65 @@
 "use client";
-import Modal from "@/components/reuse/Modal";
-import { AnimatePresence, motion } from "framer-motion";
 import {
-  Activity,
-  CheckCircle,
-  Edit3,
-  Filter,
-  Plus,
-  Save,
-  Search,
-  Trash2,
-} from "lucide-react";
+  createTechAction,
+  deleteTechAction,
+  updateTechAction,
+} from "@/action/admin/tech.action";
+import { TechForm } from "@/components/admin/TechStackForm";
+import Modal from "@/components/reuse/Modal";
+import { useTech } from "@/hooks/useTech";
+import { TechStackFormData } from "@/schemas/tech.schema";
+import { handleErrorWithToast } from "@/utils/handleErrorWithToast";
+import { AnimatePresence, motion } from "framer-motion";
+import { Edit3, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { TechItem } from "../../../../../admin.types";
-import { MOCK_TECH_CATEGORIES, MOCK_TECHS } from "../../../../../constants";
+import { TECH_CATEGORIES } from "../../../../../constants";
 
 const AdminTechStackPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("frontend");
+  const { teches, isLoading } = useTech();
+  console.log("tech", teches);
+
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTech, setEditingTech] = useState<TechItem | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const filteredTechs = MOCK_TECHS.filter((t) => {
-    const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase());
-    return (activeTab === "stack" || t.category === activeTab) && matchesSearch;
+  const filteredTechs = teches.filter((t) => {
+    const category = t.category?.toLowerCase() ?? "";
+    const title = t.title?.toLowerCase() ?? "";
+    const searchTerm = search?.toLowerCase().trim() ?? "";
+
+    const matchesSearch = !searchTerm || title.includes(searchTerm);
+    const matchesCategory =
+      activeTab === "all" || category === activeTab.toLowerCase();
+
+    return matchesSearch && matchesCategory;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUpdating(true);
-    setTimeout(() => {
-      setIsUpdating(false);
+  const handleSubmitForm = async (formData: TechStackFormData) => {
+    setIsSubmitting(true);
+    try {
+      if (editingTech) {
+        const res = await updateTechAction(formData, editingTech?.id);
+        console.log(res);
+        if (res.success && res.message) {
+          toast.success(res.message);
+        }
+      } else {
+        const res = await createTechAction(formData);
+        console.log(res);
+        if (res.success && res.message) {
+          toast.success(res.message);
+        }
+      }
       setIsModalOpen(false);
-      setEditingTech(null);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }, 1200);
+    } catch (error: unknown) {
+      handleErrorWithToast(error, "error in handleSumbitForm techStack");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (tech: TechItem) => {
@@ -45,9 +67,16 @@ const AdminTechStackPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (techId: string) => {
-    // Delete logic here
-    console.log("Delete tech:", techId);
+  const handleDelete = async (projectId: string) => {
+    try {
+      const res = await deleteTechAction(projectId);
+
+      if (res.success && res.message) {
+        toast.success(res.message);
+      }
+    } catch (error: unknown) {
+      handleErrorWithToast(error, "Error deleting tech in frontend");
+    }
   };
 
   return (
@@ -55,7 +84,9 @@ const AdminTechStackPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Technology Stack</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Technology Stack
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Manage your skills and technologies
           </p>
@@ -93,23 +124,32 @@ const AdminTechStackPage: React.FC = () => {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-muted-foreground" />
-            <div className="flex items-center gap-1">
-              {MOCK_TECH_CATEGORIES.sort((a, b) => a.order - b.order).map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveTab(cat.id)}
-                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    activeTab === cat.id
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {cat.title}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center gap-1 overflow-x-auto">
+            <button
+              key="all"
+              onClick={() => setActiveTab("all")}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === "all"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
+            >
+              All
+            </button>
+
+            {TECH_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveTab(cat)}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === cat
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                {cat} {/* display capitalized */}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -117,18 +157,20 @@ const AdminTechStackPage: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-          <p className="text-xs text-muted-foreground mb-1">Total Technologies</p>
-          <p className="text-2xl font-bold text-foreground">{MOCK_TECHS.length}</p>
+          <p className="text-xs text-muted-foreground mb-1">
+            Total Technologies
+          </p>
+          <p className="text-2xl font-bold text-foreground">{teches.length}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
           <p className="text-xs text-muted-foreground mb-1">Categories</p>
-          <p className="text-2xl font-bold text-foreground">
-            {MOCK_TECH_CATEGORIES.length - 1}
-          </p>
+          <p className="text-2xl font-bold text-foreground">{teches.length}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
           <p className="text-xs text-muted-foreground mb-1">Filtered Results</p>
-          <p className="text-2xl font-bold text-foreground">{filteredTechs.length}</p>
+          <p className="text-2xl font-bold text-foreground">
+            {filteredTechs.length}
+          </p>
         </div>
       </div>
 
@@ -142,42 +184,87 @@ const AdminTechStackPage: React.FC = () => {
           transition={{ duration: 0.3 }}
         >
           {filteredTechs.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-12 text-center">
-              <p className="text-muted-foreground">No technologies found</p>
+            <div className="bg-card border-2 border-dashed border-border rounded-2xl p-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No technologies found
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {search
+                  ? "Try adjusting your search terms"
+                  : "Add your first technology to get started"}
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {filteredTechs.map((tech, idx) => {
-                const category = MOCK_TECH_CATEGORIES.find(
-                  (c) => c.id === tech.category
-                );
+                const category = teches.find((c) => c.id === tech.category);
+
                 return (
                   <motion.div
                     key={tech.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.02 }}
-                    className="bg-card border border-border rounded-xl p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
+                    transition={{ delay: idx * 0.03, duration: 0.3 }}
+                    className={`relative bg-gradient-to-br from-card to-card/50 border rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all group overflow-hidden `}
                   >
-                    {/* Header with Icon and Actions */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center">
-                        <img
-                          src={tech.icon || "/placeholder.svg"}
-                          className="w-8 h-8 object-contain"
-                          alt={tech.name}
-                        />
+                    {/* Background Gradient Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Status Badge */}
+                    {tech.status && (
+                      <div className="absolute top-3 right-3">
+                        <div
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold ${
+                            tech.status === "Online"
+                              ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                              : "bg-gray-500/10 text-gray-600 dark:text-gray-400"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              tech.status === "Online"
+                                ? "bg-green-500 animate-pulse"
+                                : "bg-gray-400"
+                            }`}
+                          />
+                          {tech.status}
+                        </div>
                       </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    )}
+
+                    {/* Header with Icon */}
+                    <div className="relative mb-5">
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-muted to-muted/50 border border-border flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                        {tech.icon ? (
+                          <img
+                            src={tech.icon}
+                            className="w-10 h-10 object-contain"
+                            alt={tech.title}
+                            onError={(e) => {
+                              e.currentTarget.src = "/placeholder.svg";
+                            }}
+                          />
+                        ) : (
+                          <Sparkles className="w-8 h-8 text-muted-foreground/30" />
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-2 group-hover:translate-y-0">
                         <button
                           onClick={() => handleEdit(tech)}
-                          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                          className="p-2 rounded-lg bg-background border border-border shadow-sm hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                          title="Edit technology"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(tech.id)}
-                          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-2 rounded-lg bg-background border border-border shadow-sm hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete technology"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -185,39 +272,64 @@ const AdminTechStackPage: React.FC = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="space-y-3">
+                    <div className="relative space-y-4">
+                      {/* Title and Category */}
                       <div>
-                        <h3 className="text-base font-semibold text-foreground">
-                          {tech.name}
+                        <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                          {tech.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {category?.title}
-                        </p>
+                        {tech.sub_title && (
+                          <p className="text-xs font-medium text-muted-foreground/80 mb-1">
+                            {tech.sub_title}
+                          </p>
+                        )}
+                        {category && (
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-semibold">
+                            {category.title}
+                          </div>
+                        )}
                       </div>
 
-                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                        {tech.description}
-                      </p>
+                      {/* Description */}
+                      {tech.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                          {tech.description}
+                        </p>
+                      )}
 
                       {/* Proficiency Bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground font-medium">
-                            Proficiency
-                          </span>
-                          <span className="text-foreground font-semibold">
-                            {tech.level}%
-                          </span>
+                      {tech.level !== null && tech.level !== undefined && (
+                        <div className="space-y-2 pt-2 border-t border-border/50">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                              Proficiency
+                            </span>
+                            <span className="text-sm font-bold text-foreground">
+                              {tech.level}%
+                            </span>
+                          </div>
+                          <div className="h-2.5 rounded-full bg-muted/50 overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${tech.level}%` }}
+                              className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full relative overflow-hidden"
+                              transition={{
+                                duration: 1,
+                                ease: "easeOut",
+                                delay: idx * 0.05,
+                              }}
+                            >
+                              {/* Shine effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                            </motion.div>
+                          </div>
+                          <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                            <span>Beginner</span>
+                            <span>Intermediate</span>
+                            <span>Expert</span>
+                          </div>
                         </div>
-                        <div className="h-2 rounded-full bg-muted overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${tech.level}%` }}
-                            className="h-full bg-primary rounded-full"
-                            transition={{ duration: 1, ease: "easeOut" }}
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -230,141 +342,20 @@ const AdminTechStackPage: React.FC = () => {
       {/* Add/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingTech(null);
-        }}
-        title={editingTech ? "Edit Technology" : "Add New Technology"}
-        maxWidth="2xl"
+        onClose={() => setIsModalOpen(false)}
+        title={editingTech ? "Modify Project" : "New Project Registration"}
+        maxWidth="4xl"
       >
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Basic Information */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Basic Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Technology Name
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingTech?.name}
-                  placeholder="e.g., React, Node.js"
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Category
-                </label>
-                <select
-                  defaultValue={editingTech?.category}
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                >
-                  {MOCK_TECH_CATEGORIES.filter((c) => c.id !== "stack").map(
-                    (cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.title}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Icon URL
-                </label>
-                <input
-                  type="text"
-                  defaultValue={editingTech?.icon}
-                  placeholder="https://..."
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Proficiency Level (%)
-                </label>
-                <input
-                  type="number"
-                  defaultValue={editingTech?.level || 80}
-                  min="0"
-                  max="100"
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">Description</h3>
-            <textarea
-              defaultValue={editingTech?.description}
-              placeholder="Describe what this technology is used for and your experience with it..."
-              rows={4}
-              className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-            />
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditingTech(null);
-              }}
-              className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
-              {isUpdating ? (
-                <>
-                  <Activity size={16} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  {editingTech ? "Update Technology" : "Add Technology"}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+        <TechForm
+          editingTech={editingTech}
+          onSubmit={handleSubmitForm}
+          onCancel={() => {
+            setIsModalOpen(false);
+            setEditingTech(null);
+          }}
+          isSubmitting={isSubmitting}
+        />
       </Modal>
-
-      {/* Success Toast */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 right-6 z-[10000] bg-card border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 max-w-sm"
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {editingTech ? "Technology updated" : "Technology added"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Changes saved successfully
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

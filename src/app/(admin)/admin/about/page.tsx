@@ -435,8 +435,6 @@ const AdminAboutPage: React.FC = () => {
           table: "about_content",
         },
         (payload) => {
-          console.log("Real-time change detected:", payload);
-
           if (
             payload.eventType === "UPDATE" ||
             payload.eventType === "INSERT"
@@ -920,11 +918,7 @@ const AdminAboutPage: React.FC = () => {
             >
               Cancel
             </button>
-            <Button
-              type="submit"
-              disabled={isUpdating}
-              onClick={() => console.log(form.formState.errors)}
-            >
+            <Button type="submit" disabled={isUpdating}>
               {isUpdating ? "Saving..." : "Update Profile"}
             </Button>
           </div>

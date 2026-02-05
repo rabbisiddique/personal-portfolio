@@ -41,13 +41,15 @@ export interface TechCategory {
 
 export interface TechItem {
   id: string;
-  name: string;
+  title: string;
+  sub_title: string;
   icon: string;
   category: string;
   description: string;
   level: number;
+  type: string;
   status: "Online" | "Offline";
-  isVisible: boolean;
+  // isVisible: boolean;
 }
 
 export interface TimelineEntry {
