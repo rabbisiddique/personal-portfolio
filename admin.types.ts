@@ -121,30 +121,20 @@ export interface AboutData {
 export interface LabMessage {
   id: string;
   role: "bot" | "user";
-  content: string;
+  chat_content: string;
+  command: string[];
   time: string;
 }
 
 export interface LabExperiment {
-  id: string;
-  title: string;
-  model: "UI Ready" | "Planned" | "In Progress";
-  description: string;
-  complexity: number;
-  status: "Stable" | "Idle" | "Active";
-  accent: string;
-  tags: string[];
-}
-
-export interface AILabsData {
-  hero: { title: string; subtitle: string; philosophyQuote: string };
-  chat: {
-    chatTitle: string;
-    chatStatus: string;
-    messages: LabMessage[];
-    examplePrompts: string[];
-  };
-  roadmap: { roadmapTitle: string; experiments: LabExperiment[] };
+  id: string; // UUID
+  title: string; // Experiment title
+  model?: "UI Ready" | "Planned" | "In Progress"; // Phase or model
+  description: string; // Experiment description
+  accent?: string; // Hex color code
+  tags: string[]; // List of tags
+  created_at?: string; // Optional timestamp
+  updated_at?: string; // Optional timestamp
 }
 
 export interface ContactPageData {

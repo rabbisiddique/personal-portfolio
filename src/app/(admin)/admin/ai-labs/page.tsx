@@ -1,755 +1,429 @@
 "use client";
+
+import {
+  createAiLabsChatAction,
+  createAiLabsExperimentsAction,
+  deleteAiLabsChatAction,
+  deleteAiLabsExperimentsAction,
+  updateAiLabsChatAction,
+  updateAiLabsExperimentsAction,
+} from "@/action/admin/aiLabs.action";
+import AILabChatForm from "@/components/admin/AiLabChatForm";
+import AILabExperimentForm from "@/components/admin/AILabExperimentForm";
+import { ProjectCardSkeleton } from "@/components/admin/loading/SkeletonProjectCard";
 import Modal from "@/components/reuse/Modal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAiLabs } from "@/hooks/useAiLabs";
+import {
+  AILabChatFormData,
+  AILabExperimentFormData,
+} from "@/schemas/aiLabs.schema";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
-  BarChart3,
+  Beaker,
   Bot,
-  CheckCircle,
   Edit3,
   MessageSquare,
   Plus,
   Save,
-  Sparkles,
   Trash2,
   User,
 } from "lucide-react";
 import React, { useState } from "react";
-import { AILabsData } from "../../../../../admin.types";
-import { MOCK_AI_LABS_DATA } from "../../../../../constants";
+import toast from "react-hot-toast";
+
+const INITIAL_DATA = {
+  chat: {
+    messages: [
+      {
+        id: "1",
+        role: "bot",
+        content: "Protocol initiated. How can I assist your research today?",
+        time: "09:00 AM",
+        title: "Initial Greeting",
+        tags: ["System"],
+      },
+    ],
+  },
+  roadmap: {
+    experiments: [
+      {
+        id: "exp1",
+        title: "Visual Synthesis Engine",
+        description:
+          "Generative model specialized in high-fidelity interface components.",
+        model: "VSE-v4",
+        status: "Active" as const,
+        accent: "#3b82f6",
+        tags: ["Generative", "UI"],
+      },
+    ],
+  },
+};
 
 const AdminAILabsPage: React.FC = () => {
-  const [data, setData] = useState<AILabsData>(MOCK_AI_LABS_DATA);
-  const [activeTab, setActiveTab] = useState<"hero" | "chat" | "roadmap">(
-    "hero",
-  );
+  const { data, isLoading } = useAiLabs();
+  console.log("data", data);
+
+  const [activeTab, setActiveTab] = useState<"chat" | "roadmap">("chat");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<"message" | "experiment" | null>(
+  const [modalType, setModalType] = useState<"chat" | "experiment" | null>(
     null,
   );
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUpdating(true);
-    setTimeout(() => {
-      setIsUpdating(false);
-      setIsModalOpen(false);
-      setModalType(null);
-      setEditingItem(null);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }, 1200);
+  const formId = "ai-lab-management-form";
+
+  const handleOpenModal = (type: "chat" | "experiment", item?: any) => {
+    setModalType(type);
+    setEditingItem(item || null);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string, type: "message" | "experiment") => {
-    if (type === "message") {
-      setData({
-        ...data,
-        chat: {
-          ...data.chat,
-          messages: data.chat.messages.filter((m) => m.id !== id),
-        },
-      });
-    } else {
-      setData({
-        ...data,
-        roadmap: {
-          ...data.roadmap,
-          experiments: data.roadmap.experiments.filter((e) => e.id !== id),
-        },
-      });
+  const handleItemSubmit = async (
+    values: AILabChatFormData | AILabExperimentFormData,
+  ) => {
+    setIsUpdating(true);
+    try {
+      if (modalType === "chat") {
+        if (editingItem) {
+          const res = await updateAiLabsChatAction(
+            values as AILabChatFormData,
+            editingItem.id,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        } else {
+          const res = await createAiLabsChatAction(values as AILabChatFormData);
+          if (res.success && res.message) toast.success(res.message);
+        }
+      } else if (modalType === "experiment") {
+        if (editingItem) {
+          const res = await updateAiLabsExperimentsAction(
+            values as AILabExperimentFormData,
+            editingItem.id,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        } else {
+          const res = await createAiLabsExperimentsAction(
+            values as AILabExperimentFormData,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        }
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+      toast.error("Something went wrong!");
+    } finally {
+      setIsUpdating(false);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleDelete = async (id: string, type: "chat" | "experiment") => {
+    try {
+      if (type === "chat") {
+        const res = await deleteAiLabsChatAction(id);
+        console.log(res);
+        if (res.success && res.message) return toast.success(res.message);
+      } else {
+        const res = await deleteAiLabsExperimentsAction(id);
+        console.log(res);
+        if (res.success && res.message) return toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">AI Labs</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your AI experiments and chat interface
+    <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <Badge
+            variant="outline"
+            className="text-blue-500 border-blue-500/20 bg-blue-500/5 mb-2"
+          >
+            Research Sector 7
+          </Badge>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">
+            AI Labs
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Architect Neural Interface experiences and monitor research cycles.
           </p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-card border border-border rounded-xl p-1 shadow-sm inline-flex">
+      <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-[1.25rem] w-fit shadow-inner border border-slate-200 dark:border-slate-700">
         {[
-          { id: "hero", label: "Hero Section", icon: Sparkles },
-          { id: "chat", label: "Chat Interface", icon: MessageSquare },
-          { id: "roadmap", label: "Experiments", icon: BarChart3 },
+          { id: "chat", label: "Neural Interface", icon: MessageSquare },
+          { id: "roadmap", label: "Experimental Roadmap", icon: Beaker },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all ${
-              activeTab === tab.id
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-            }`}
+            className={`flex items-center gap-2.5 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === tab.id ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl" : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"}`}
           >
-            <tab.icon size={16} />
+            <tab.icon size={18} strokeWidth={2.5} />
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* Content */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4 }}
+          className="space-y-10"
         >
-          {/* Hero Tab */}
-          {activeTab === "hero" && (
-            <div className="space-y-6">
-              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-foreground mb-6">
-                  Hero Section Content
-                </h2>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                      Page Title
-                    </label>
-                    <input
-                      type="text"
-                      value={data.hero.title}
-                      onChange={(e) =>
-                        setData({
-                          ...data,
-                          hero: { ...data.hero, title: e.target.value },
-                        })
-                      }
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                      Subtitle
-                    </label>
-                    <textarea
-                      value={data.hero.subtitle}
-                      onChange={(e) =>
-                        setData({
-                          ...data,
-                          hero: { ...data.hero, subtitle: e.target.value },
-                        })
-                      }
-                      rows={4}
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                      Philosophy Quote
-                    </label>
-                    <textarea
-                      value={data.hero.philosophyQuote}
-                      onChange={(e) =>
-                        setData({
-                          ...data,
-                          hero: {
-                            ...data.hero,
-                            philosophyQuote: e.target.value,
-                          },
-                        })
-                      }
-                      rows={3}
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSubmit}
-                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm"
-                >
-                  <Save size={16} />
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Chat Tab */}
           {activeTab === "chat" && (
             <div className="space-y-6">
-              {/* Chat Settings */}
-              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-foreground mb-6">
-                  Chat Settings
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                      Chat Title
-                    </label>
-                    <input
-                      type="text"
-                      value={data.chat.chatTitle}
-                      onChange={(e) =>
-                        setData({
-                          ...data,
-                          chat: { ...data.chat, chatTitle: e.target.value },
-                        })
-                      }
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                      Status Message
-                    </label>
-                    <input
-                      type="text"
-                      value={data.chat.chatStatus}
-                      onChange={(e) =>
-                        setData({
-                          ...data,
-                          chat: { ...data.chat, chatStatus: e.target.value },
-                        })
-                      }
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Sequence Archive
+                  </h2>
                 </div>
+                <Button
+                  variant="outline"
+                  onClick={() => handleOpenModal("chat")}
+                  className="rounded-xl border-slate-200 dark:border-slate-800"
+                >
+                  <Plus size={18} className="mr-2" /> Inject Protocol
+                </Button>
               </div>
 
-              {/* Chat Messages */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Chat Messages
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Manage pre-configured chat examples
-                    </p>
-                  </div>
-                  <motion.button
-                    onClick={() => {
-                      setEditingItem(null);
-                      setModalType("message");
-                      setIsModalOpen(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Plus size={16} />
-                    Add Message
-                  </motion.button>
-                </div>
-
-                {data.chat.messages.length === 0 ? (
-                  <div className="bg-card border border-border rounded-xl p-12 text-center">
-                    <p className="text-muted-foreground">
-                      No messages added yet
-                    </p>
+              <div className="grid grid-cols-1 gap-4">
+                {isLoading ? (
+                  // Show skeleton while loading
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <ProjectCardSkeleton key={`skeleton-${index}`} />
+                    ))}
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {data.chat.messages.map((msg) => (
+                  <>
+                    {data?.chat?.messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className="bg-card border border-border rounded-xl p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
+                        className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 flex gap-6 items-start transition-all hover:shadow-xl hover:-translate-y-1"
                       >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              msg.role === "bot"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-muted text-foreground"
-                            }`}
-                          >
-                            {msg.role === "bot" ? (
-                              <Bot size={20} />
-                            ) : (
-                              <User size={20} />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-semibold text-foreground">
-                                {msg.role === "bot" ? "AI Assistant" : "User"}
+                        <div
+                          className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-2 ${msg.role === "bot" ? "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20" : "bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:border-slate-700"}`}
+                        >
+                          {msg.role === "bot" ? (
+                            <Bot size={28} />
+                          ) : (
+                            <User size={28} />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                                {msg.role === "bot"
+                                  ? "Assistant Node"
+                                  : "Client Signal"}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[10px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
                                 {msg.time}
                               </span>
                             </div>
-                            <p className="text-sm text-foreground leading-relaxed">
-                              {msg.content}
-                            </p>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleOpenModal("chat", msg)}
+                              >
+                                <Edit3 size={16} />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-red-500"
+                                onClick={() => handleDelete(msg.id, "chat")}
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => {
-                                setEditingItem(msg);
-                                setModalType("message");
-                                setIsModalOpen(true);
-                              }}
-                              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(msg.id, "message")}
-                              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                            {msg?.title}
+                          </h4>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                            {msg.chat_content}
+                          </p>
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
           )}
 
-          {/* Experiments Tab */}
           {activeTab === "roadmap" && (
-            <div className="space-y-6">
+            <div className="space-y-10">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Research Experiments
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Active Experiments
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Manage your AI research and development projects
-                  </p>
                 </div>
-                <motion.button
-                  onClick={() => {
-                    setEditingItem(null);
-                    setModalType("experiment");
-                    setIsModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <Button
+                  onClick={() => handleOpenModal("experiment")}
+                  className="bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20 rounded-xl h-12 px-6"
                 >
-                  <Plus size={16} />
-                  Add Experiment
-                </motion.button>
+                  <Plus size={18} className="mr-2" /> Initialize Research
+                </Button>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Total Experiments
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {data.roadmap.experiments.length}
-                  </p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                  <p className="text-xs text-muted-foreground mb-1">Active</p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {
-                      data.roadmap.experiments.filter(
-                        (e) => e.status === "Active",
-                      ).length
-                    }
-                  </p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Avg. Complexity
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {Math.round(
-                      data.roadmap.experiments.reduce(
-                        (acc, e) => acc + e.complexity,
-                        0,
-                      ) / data.roadmap.experiments.length,
-                    )}
-                    %
-                  </p>
-                </div>
-              </div>
-
-              {/* Experiments Grid */}
-              {data.roadmap.experiments.length === 0 ? (
-                <div className="bg-card border border-border rounded-xl p-12 text-center">
-                  <p className="text-muted-foreground">
-                    No experiments added yet
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {data.roadmap.experiments.map((exp) => (
-                    <div
-                      key={exp.id}
-                      className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
-                    >
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span
-                              className="text-xs px-2.5 py-1 rounded-md font-medium"
-                              style={{
-                                backgroundColor: exp.accent + "20",
-                                color: exp.accent,
-                              }}
-                            >
-                              {exp.model}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              <div
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  exp.status === "Active"
-                                    ? "bg-emerald-500"
-                                    : "bg-amber-500"
-                                }`}
-                              />
-                              <span className="text-xs text-muted-foreground">
-                                {exp.status}
-                              </span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {isLoading ? (
+                  // Show skeleton while loading
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <ProjectCardSkeleton key={`skeleton-${index}`} />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {data?.roadmap?.experiments.map((exp) => (
+                      <div
+                        key={exp.id}
+                        className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden relative"
+                      >
+                        <div
+                          className="absolute top-0 right-0 w-32 h-32 opacity-10 -mr-16 -mt-16 rounded-full"
+                          style={{ backgroundColor: exp.accent }}
+                        />
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="border-indigo-500/20 bg-indigo-500/5 text-indigo-500"
+                              >
+                                {exp.model}
+                              </Badge>
                             </div>
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                              {exp.title}
+                            </h3>
                           </div>
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {exp.title}
-                          </h3>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleOpenModal("experiment", exp)}
+                            >
+                              <Edit3 size={18} />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-red-500"
+                              onClick={() => handleDelete(exp.id, "experiment")}
+                            >
+                              <Trash2 size={18} />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => {
-                              setEditingItem(exp);
-                              setModalType("experiment");
-                              setIsModalOpen(true);
-                            }}
-                            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            <Edit3 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(exp.id, "experiment")}
-                            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                        {exp.description}
-                      </p>
-
-                      {/* Progress Bar */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground font-medium">
-                            Complexity
-                          </span>
-                          <span className="text-foreground font-semibold">
-                            {exp.complexity}%
-                          </span>
-                        </div>
-                        <div className="h-2 rounded-full bg-muted overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${exp.complexity}%` }}
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: exp.accent }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                          />
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8 line-clamp-2">
+                          {exp.description}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {exp.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[10px] font-bold text-slate-500 uppercase tracking-wider"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
                       </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2">
-                        {exp.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-2.5 py-1 rounded-md bg-muted border border-border text-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Message Modal */}
       <Modal
-        isOpen={isModalOpen && modalType === "message"}
-        onClose={() => {
-          setIsModalOpen(false);
-          setModalType(null);
-          setEditingItem(null);
-        }}
-        title={editingItem ? "Edit Message" : "Add New Message"}
-      >
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Message Details
-            </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Role
-                  </label>
-                  <select
-                    defaultValue={editingItem?.role || "user"}
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  >
-                    <option value="user">User</option>
-                    <option value="bot">AI Assistant</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Timestamp
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={editingItem?.time || "12:00 PM"}
-                    placeholder="e.g., 12:00 PM"
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Message Content
-                </label>
-                <textarea
-                  defaultValue={editingItem?.content}
-                  placeholder="Enter message content..."
-                  rows={4}
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                setModalType(null);
-                setEditingItem(null);
-              }}
-              className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
-              {isUpdating ? (
-                <>
-                  <Activity size={16} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  {editingItem ? "Update Message" : "Add Message"}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Experiment Modal */}
-      <Modal
-        isOpen={isModalOpen && modalType === "experiment"}
-        onClose={() => {
-          setIsModalOpen(false);
-          setModalType(null);
-          setEditingItem(null);
-        }}
-        title={editingItem ? "Edit Experiment" : "Add New Experiment"}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={
+          editingItem
+            ? `Refine ${modalType === "chat" ? "Signal" : "Research"}`
+            : `Deploy ${modalType === "chat" ? "Interface" : "Experiment"}`
+        }
         maxWidth="2xl"
       >
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Basic Information
-            </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Experiment Title
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={editingItem?.title}
-                    placeholder="e.g., GPT-4 Integration"
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Model/Phase
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={editingItem?.model}
-                    placeholder="e.g., UI Ready, Planned"
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
+        {modalType === "experiment" ? (
+          <AILabExperimentForm
+            formId={formId}
+            initialData={editingItem}
+            onSubmit={handleItemSubmit}
+            footer={
+              <div className="flex justify-end gap-3 w-full">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                  Abort Mission
+                </Button>
+                <Button
+                  disabled={isUpdating}
+                  form={formId}
+                  type="submit"
+                  className="rounded-xl px-10 h-12 shadow-xl shadow-blue-500/20"
+                >
+                  {isUpdating ? (
+                    <Activity size={18} className="animate-spin mr-2" />
+                  ) : (
+                    <Save size={18} className="mr-2" />
+                  )}
+                  {editingItem ? "Update Registry" : "Finilize the experiments"}
+                </Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Complexity (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    defaultValue={editingItem?.complexity || 50}
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                    Status
-                  </label>
-                  <select
-                    defaultValue={editingItem?.status || "Active"}
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Stable">Stable</option>
-                    <option value="Idle">Idle</option>
-                  </select>
-                </div>
+            }
+          />
+        ) : (
+          <AILabChatForm
+            formId={formId}
+            initialData={editingItem}
+            onSubmit={handleItemSubmit}
+            footer={
+              <div className="flex justify-end gap-3 w-full">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                  Abort Mission
+                </Button>
+                <Button
+                  disabled={isUpdating}
+                  form={formId}
+                  type="submit"
+                  className="rounded-xl px-10 h-12 shadow-xl shadow-blue-500/20"
+                >
+                  {isUpdating ? (
+                    <Activity size={18} className="animate-spin mr-2" />
+                  ) : (
+                    <Save size={18} className="mr-2" />
+                  )}
+                  {editingItem ? "Update Registry" : "Finilize the chat"}
+                </Button>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-2">
-                  Accent Color
-                </label>
-                <input
-                  type="color"
-                  defaultValue={editingItem?.accent || "#3b82f6"}
-                  className="w-full h-10 rounded-lg cursor-pointer border border-border bg-background"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">
-              Description
-            </h3>
-            <textarea
-              defaultValue={editingItem?.description}
-              placeholder="Describe the experiment goals and methodology..."
-              rows={4}
-              className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-            />
-          </div>
-
-          <div className="bg-muted/30 rounded-xl p-6 border border-border">
-            <h3 className="text-sm font-bold text-foreground mb-4">Tags</h3>
-            <input
-              type="text"
-              defaultValue={editingItem?.tags?.join(", ")}
-              placeholder="AI, ML, Research (comma-separated)"
-              className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Separate tags with commas
-            </p>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                setModalType(null);
-                setEditingItem(null);
-              }}
-              className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
-              {isUpdating ? (
-                <>
-                  <Activity size={16} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  {editingItem ? "Update Experiment" : "Add Experiment"}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Success Toast */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 right-6 z-[10000] bg-card border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 max-w-sm"
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle
-                size={20}
-                className="text-emerald-600 dark:text-emerald-400"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Changes saved
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Your {modalType === "message" ? "message" : "experiment"} has
-                been updated
-              </p>
-            </div>
-          </motion.div>
+            }
+          />
         )}
-      </AnimatePresence>
+      </Modal>
     </div>
   );
 };
