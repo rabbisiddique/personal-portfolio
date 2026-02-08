@@ -34,38 +34,8 @@ import {
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
-const INITIAL_DATA = {
-  chat: {
-    messages: [
-      {
-        id: "1",
-        role: "bot",
-        content: "Protocol initiated. How can I assist your research today?",
-        time: "09:00 AM",
-        title: "Initial Greeting",
-        tags: ["System"],
-      },
-    ],
-  },
-  roadmap: {
-    experiments: [
-      {
-        id: "exp1",
-        title: "Visual Synthesis Engine",
-        description:
-          "Generative model specialized in high-fidelity interface components.",
-        model: "VSE-v4",
-        status: "Active" as const,
-        accent: "#3b82f6",
-        tags: ["Generative", "UI"],
-      },
-    ],
-  },
-};
-
 const AdminAILabsPage: React.FC = () => {
   const { data, isLoading } = useAiLabs();
-  console.log("data", data);
 
   const [activeTab, setActiveTab] = useState<"chat" | "roadmap">("chat");
   const [isModalOpen, setIsModalOpen] = useState(false);

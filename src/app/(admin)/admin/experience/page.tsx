@@ -1,530 +1,620 @@
 "use client";
+
+import {
+  createTimeLineExperienceAction,
+  createTimeLineWorkAction,
+  deleteTimeLineExperienceAction,
+  deleteTimeLineWorkAction,
+  updateTimeLineExperienceAction,
+  updateTimeLineWorkAction,
+} from "@/action/admin/timeline.action";
+import { ProjectCardSkeleton } from "@/components/admin/loading/SkeletonProjectCard";
+import SmartIcon from "@/components/admin/SmartIcon";
+import TimelineExperienceForm from "@/components/admin/TimelineExperienceForm";
+import TimelineWorkForm from "@/components/admin/TimelineWorkForm";
 import Modal from "@/components/reuse/Modal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
+import { useTimeLine } from "@/hooks/useTimeLine";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
+  Award,
   Briefcase,
-  Calendar,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Code,
-  Cpu,
+  ChevronRight,
+  Clock,
   Edit3,
   GraduationCap,
-  LucideIcon,
+  History,
   Plus,
   Save,
-  Tag,
+  Terminal,
   Trash2,
-  Zap,
 } from "lucide-react";
 import React, { useState } from "react";
-import { TimelineEntry } from "../../../../../admin.types";
-import {
-  MOCK_EDUCATION_LIST,
-  MOCK_EXPERIENCE_LIST,
-} from "../../../../../constants";
+import toast from "react-hot-toast";
+import { TimelineEntry, TimelineType } from "../../../../../admin.types";
 
-// Your form component
-const iconMap: Record<string, LucideIcon> = {
-  Briefcase,
-  GraduationCap,
-  Cpu,
-  Zap,
-  Code,
-};
-
-const getIconComponent = (name: string): LucideIcon => {
-  return iconMap[name] || Briefcase;
-};
-
-const AdminExperiencePage: React.FC = () => {
-  const [experience, setExperience] =
-    useState<TimelineEntry[]>(MOCK_EXPERIENCE_LIST);
-  const [education, setEducation] =
-    useState<TimelineEntry[]>(MOCK_EDUCATION_LIST);
-  const [activeTab, setActiveTab] = useState<"work" | "education">("work");
+const AdminTimelinePage: React.FC = () => {
+  const { data, isLoading } = useTimeLine();
+  const [activeTab, setActiveTab] = useState<TimelineType>("work");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<{
-    item: TimelineEntry | null;
-    type: "work" | "education";
-  }>({ item: null, type: "work" });
+  const [editingItem, setEditingItem] = useState<TimelineEntry | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const formId = "timeline-management-form";
+
+  console.log(data);
+
+  const handleOpenModal = (item?: TimelineEntry) => {
+    setEditingItem(item || null);
+    setIsModalOpen(true);
+  };
+
+  const handleItemSubmit = async (
+    values: Omit<TimelineEntry, "id"> & { id?: string },
+  ) => {
     setIsUpdating(true);
-    setTimeout(() => {
+    try {
+      if (activeTab === "work") {
+        if (editingItem) {
+          // editingItem.id exists, so pass it
+          const res = await updateTimeLineWorkAction(
+            values as TimelineEntry,
+            editingItem.id,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        } else {
+          // New entry, no id needed
+          const res = await createTimeLineWorkAction(values as TimelineEntry);
+          if (res.success && res.message) toast.success(res.message);
+        }
+      } else {
+        if (editingItem) {
+          const res = await updateTimeLineExperienceAction(
+            values as TimelineEntry,
+            editingItem.id,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        } else {
+          const res = await createTimeLineExperienceAction(
+            values as TimelineEntry,
+          );
+          if (res.success && res.message) toast.success(res.message);
+        }
+      }
       setIsUpdating(false);
       setIsModalOpen(false);
-      setEditingItem({ item: null, type: activeTab });
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }, 1200);
-  };
-
-  const moveItem = (
-    list: TimelineEntry[],
-    index: number,
-    direction: "up" | "down",
-    setList: React.Dispatch<React.SetStateAction<TimelineEntry[]>>,
-  ) => {
-    const newList = [...list];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newList.length) return;
-    [newList[index], newList[targetIndex]] = [
-      newList[targetIndex],
-      newList[index],
-    ];
-    setList(newList);
-  };
-
-  const handleDelete = (id: string, type: "work" | "education") => {
-    if (type === "work") {
-      setExperience(experience.filter((item) => item.id !== id));
-    } else {
-      setEducation(education.filter((item) => item.id !== id));
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const currentList = activeTab === "work" ? experience : education;
-  const setCurrentList = activeTab === "work" ? setExperience : setEducation;
+  const handleDelete = async (id: string, mode: "work" | "experience") => {
+    try {
+      if (mode === "work") {
+        const res = await deleteTimeLineWorkAction(id);
+        console.log(res);
+        if (res.success && res.message) return toast.success(res.message);
+      } else {
+        const res = await deleteTimeLineExperienceAction(id);
+        console.log(res);
+        if (res.success && res.message) return toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Experience & Education
+    <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <Badge
+            variant="outline"
+            className="text-indigo-500 border-indigo-500/20 bg-indigo-500/5 mb-2"
+          >
+            Sector: Professional History
+          </Badge>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">
+            Chronos Registry
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your professional and academic background
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            Map out your technical evolution and institutional milestones.
           </p>
         </div>
-        <motion.button
-          onClick={() => {
-            setEditingItem({ item: null, type: activeTab });
-            setIsModalOpen(true);
-          }}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors shadow-sm"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Plus size={16} />
-          Add {activeTab === "work" ? "Experience" : "Education"}
-        </motion.button>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-card border border-border rounded-xl p-1 shadow-sm inline-flex">
+      <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-[1.25rem] w-fit shadow-inner border border-slate-200 dark:border-slate-700">
         {[
-          { id: "work", label: "Work Experience", icon: Briefcase },
-          { id: "education", label: "Education", icon: GraduationCap },
+          { id: "work", label: "Career Path", icon: Briefcase },
+          { id: "experience", label: "Academic Roadmap", icon: GraduationCap },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as "work" | "education")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all ${
-              activeTab === tab.id
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-            }`}
+            onClick={() => setActiveTab(tab.id as TimelineType)}
+            className={`flex items-center gap-2.5 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === tab.id ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xl" : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"}`}
           >
-            <tab.icon size={16} />
+            <tab.icon size={18} strokeWidth={2.5} />
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-          <p className="text-xs text-muted-foreground mb-1">Total Entries</p>
-          <p className="text-2xl font-bold text-foreground">
-            {currentList.length}
-          </p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-          <p className="text-xs text-muted-foreground mb-1">Active Positions</p>
-          <p className="text-2xl font-bold text-foreground">
-            {currentList.filter((item) => item.status === "active").length}
-          </p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-          <p className="text-xs text-muted-foreground mb-1">Total Skills</p>
-          <p className="text-2xl font-bold text-foreground">
-            {new Set(currentList.flatMap((item) => item.skills)).size}
-          </p>
-        </div>
-      </div>
-
-      {/* Timeline Entries */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4"
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4 }}
+          className="space-y-10"
         >
-          {currentList.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-12 text-center">
-              <p className="text-muted-foreground">
-                No {activeTab === "work" ? "experience" : "education"} entries
-                yet
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-1.5 h-6 rounded-full ${activeTab === "work" ? "bg-blue-500" : "bg-purple-500"}`}
+              />
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                {activeTab === "work"
+                  ? "Career Sequence"
+                  : "Institutional Roadmap"}
+              </h2>
             </div>
-          ) : (
-            currentList.map((item, idx) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
-              >
-                <div className="flex gap-6">
-                  {/* Order Controls */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() =>
-                        moveItem(currentList, idx, "up", setCurrentList)
-                      }
-                      disabled={idx === 0}
-                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ChevronUp size={18} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        moveItem(currentList, idx, "down", setCurrentList)
-                      }
-                      disabled={idx === currentList.length - 1}
-                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ChevronDown size={18} />
-                    </button>
-                  </div>
+            <Button
+              variant="outline"
+              onClick={() => handleOpenModal()}
+              className="rounded-xl border-slate-200 dark:border-slate-800 h-12 px-6"
+            >
+              <Plus size={18} className="mr-2" /> Inject Entry
+            </Button>
+          </div>
 
-                  {/* Icon */}
-                  <div
-                    className="w-14 h-14 rounded-lg flex items-center justify-center bg-muted border border-border flex-shrink-0"
-                    style={{
-                      borderColor: item.accent + "40",
-                      color: item.accent,
-                    }}
-                  >
-                    {React.createElement(getIconComponent(item.icon), {
-                      size: 28,
-                      strokeWidth: 1.8,
-                    })}
-                  </div>
+          <div className="space-y-8 relative">
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-100 dark:bg-slate-800 hidden md:block" />
 
-                  {/* Content */}
-                  <div className="flex-1 space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {item.role}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {item.title}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs px-3 py-1.5 rounded-lg bg-muted border border-border text-foreground font-medium whitespace-nowrap">
-                          {item.period}
-                        </span>
-                        {item.status === "active" && (
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                              Active
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-
-                    {/* Skills */}
-                    <div className="flex flex-wrap gap-2">
-                      {item.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="text-xs px-2.5 py-1 rounded-md bg-muted border border-border text-foreground"
-                        >
-                          {skill}
-                        </span>
+            {activeTab === "work" ? (
+              <>
+                {isLoading ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <ProjectCardSkeleton key={`skeleton-${index}`} />
                       ))}
                     </div>
-                  </div>
+                  </>
+                ) : (
+                  <>
+                    {isLoading ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                          {Array.from({ length: 6 }).map((_, index) => (
+                            <ProjectCardSkeleton key={`skeleton-${index}`} />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {data.workRes.length === 0 ? (
+                          <>
+                            <div className="bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-24 text-center">
+                              <History
+                                size={48}
+                                className="mx-auto text-slate-300 mb-4"
+                              />
+                              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-6">
+                                No entries mapped in this sector.
+                              </p>
+                              <Button
+                                onClick={() => handleOpenModal()}
+                                className="rounded-xl"
+                              >
+                                Initialize First Node
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          data.workRes.map((entry, index) => (
+                            <motion.div
+                              key={entry.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="relative group pl-0 md:pl-20"
+                            >
+                              <div
+                                className="absolute left-5 top-10 w-6 h-6 rounded-full border-4 border-white dark:border-slate-950 z-10 hidden md:flex items-center justify-center shadow-lg group-hover:scale-125 transition-all duration-300"
+                                style={{ backgroundColor: entry.accent }}
+                              >
+                                <ChevronRight
+                                  size={10}
+                                  className="text-white"
+                                />
+                              </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingItem({ item, type: activeTab });
-                        setIsModalOpen(true);
-                      }}
-                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden relative group/card">
+                                <div
+                                  className="absolute top-0 right-0 w-48 h-48 opacity-[0.03] group-hover/card:opacity-[0.08] -mr-16 -mt-16 rounded-full transition-opacity duration-500"
+                                  style={{ backgroundColor: entry.accent }}
+                                />
+
+                                <div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
+                                  <div className="flex gap-6 items-start">
+                                    <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 overflow-hidden p-3">
+                                      {/* <SmartIcon icon={entry.icon} className="w-full h-full text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-500" /> */}
+                                    </div>
+                                    <div className="space-y-4">
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          variant="outline"
+                                          className="text-[9px] py-1 px-3 border-slate-200 dark:border-slate-800 flex items-center gap-2 font-black tracking-[0.1em]"
+                                        >
+                                          <Clock
+                                            size={12}
+                                            className={
+                                              activeTab === "work"
+                                                ? "text-blue-500"
+                                                : "text-purple-500"
+                                            }
+                                          />{" "}
+                                          {entry.year}
+                                        </Badge>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                                          {entry.title}
+                                        </h3>
+                                        <p className="text-lg font-bold text-slate-400 dark:text-slate-500 tracking-tight flex items-center gap-2">
+                                          {activeTab != "work" ? (
+                                            <Award
+                                              size={18}
+                                              className="text-purple-400"
+                                            />
+                                          ) : (
+                                            <Terminal
+                                              size={18}
+                                              className="text-blue-400"
+                                            />
+                                          )}
+                                          {entry.role}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 shrink-0 self-start lg:self-auto relative z-10">
+                                    {" "}
+                                    {/* ADD relative z-10 */}
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        console.log(entry);
+                                        handleOpenModal(entry);
+                                      }}
+                                      className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                      <Edit3 size={16} />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="w-11 h-11 rounded-xl text-red-500 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20"
+                                      onClick={() =>
+                                        handleDelete(entry.id, activeTab)
+                                      }
+                                    >
+                                      <Trash2 size={16} />
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-3xl font-medium text-sm">
+                                  {entry.description}
+                                </p>
+
+                                {entry.achievements &&
+                                  entry.achievements.length > 0 && (
+                                    <div className="mb-8 space-y-3">
+                                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <CheckCircle
+                                          size={14}
+                                          className="text-emerald-500"
+                                        />{" "}
+                                        Key Accomplishments
+                                      </h4>
+                                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        {entry.achievements.map((item, idx) => (
+                                          <li
+                                            key={idx}
+                                            className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/50"
+                                          >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                            {item}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                <div className="space-y-3">
+                                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Terminal
+                                      size={14}
+                                      className={
+                                        activeTab === "work"
+                                          ? "text-blue-500"
+                                          : "text-purple-500"
+                                      }
+                                    />{" "}
+                                    {activeTab === "work"
+                                      ? "Tech Stack"
+                                      : "Acquired Proficiencies"}
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {entry.skills.map((skill) => (
+                                      <span
+                                        key={skill}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider shadow-sm transition-transform hover:-translate-y-0.5"
+                                      >
+                                        {skill}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                {data.experienceRes.length === 0 ? (
+                  <>
+                    <div className="bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-24 text-center">
+                      <History
+                        size={48}
+                        className="mx-auto text-slate-300 mb-4"
+                      />
+                      <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-6">
+                        No entries mapped in this sector.
+                      </p>
+                      <Button
+                        onClick={() => handleOpenModal()}
+                        className="rounded-xl"
+                      >
+                        Initialize First Node
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  data.experienceRes.map((entry, index) => (
+                    <motion.div
+                      key={entry.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative group pl-0 md:pl-20"
                     >
-                      <Edit3 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id, activeTab)}
-                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          )}
+                      <div
+                        className="absolute left-5 top-10 w-6 h-6 rounded-full border-4 border-white dark:border-slate-950 z-10 hidden md:flex items-center justify-center shadow-lg group-hover:scale-125 transition-all duration-300"
+                        style={{ backgroundColor: entry.accent }}
+                      >
+                        <ChevronRight size={10} className="text-white" />
+                      </div>
+
+                      <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden relative group/card">
+                        <div
+                          className="absolute top-0 right-0 w-48 h-48 opacity-[0.03] group-hover/card:opacity-[0.08] -mr-16 -mt-16 rounded-full transition-opacity duration-500"
+                          style={{ backgroundColor: entry.accent }}
+                        />
+
+                        <div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
+                          <div className="flex gap-6 items-start">
+                            <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 overflow-hidden p-3">
+                              <SmartIcon
+                                icon={entry.icon}
+                                className="w-full h-full text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-500"
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[9px] py-1 px-3 border-slate-200 dark:border-slate-800 flex items-center gap-2 font-black tracking-[0.1em]"
+                                >
+                                  <Clock
+                                    size={12}
+                                    className={
+                                      activeTab === "experience"
+                                        ? "text-blue-500"
+                                        : "text-purple-500"
+                                    }
+                                  />{" "}
+                                  {entry.year}
+                                </Badge>
+                              </div>
+                              <div className="space-y-1">
+                                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                                  {entry.title}
+                                </h3>
+                                <p className="text-lg font-bold text-slate-400 dark:text-slate-500 tracking-tight flex items-center gap-2">
+                                  {activeTab === "experience" ? (
+                                    <Award
+                                      size={18}
+                                      className="text-purple-400"
+                                    />
+                                  ) : (
+                                    <Terminal
+                                      size={18}
+                                      className="text-blue-400"
+                                    />
+                                  )}
+                                  {entry.role}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 shrink-0 self-start lg:self-auto relative z-10">
+                            {" "}
+                            {/* ADD relative z-10 */}
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                console.log(entry);
+                                handleOpenModal(entry);
+                              }}
+                              className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                            >
+                              <Edit3 size={16} />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="w-11 h-11 rounded-xl text-red-500 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20"
+                              onClick={() => handleDelete(entry.id, activeTab)}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-3xl font-medium text-sm">
+                          {entry.description}
+                        </p>
+
+                        {entry.achievements &&
+                          entry.achievements.length > 0 && (
+                            <div className="mb-8 space-y-3">
+                              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <CheckCircle
+                                  size={14}
+                                  className="text-emerald-500"
+                                />{" "}
+                                Key Accomplishments
+                              </h4>
+                              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {entry.achievements.map((item, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/50"
+                                  >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <Terminal
+                              size={14}
+                              className={
+                                activeTab === "experience"
+                                  ? "text-blue-500"
+                                  : "text-purple-500"
+                              }
+                            />{" "}
+                            {activeTab === "experience"
+                              ? "Tech Stack"
+                              : "Acquired Proficiencies"}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.skills.map((skill) => (
+                              <span
+                                key={skill}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider shadow-sm transition-transform hover:-translate-y-0.5"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </>
+            )}
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Add/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingItem({ item: null, type: activeTab });
-        }}
+        onClose={() => setIsModalOpen(false)}
         title={
-          editingItem.item
-            ? `Edit ${activeTab === "work" ? "Experience" : "Education"}`
-            : `Add ${activeTab === "work" ? "Experience" : "Education"}`
+          editingItem
+            ? `Update ${activeTab === "work" ? "Employment" : "Institutional"} Registry`
+            : `Inject New ${activeTab === "work" ? "Career" : "Academic"} Node`
         }
         maxWidth="4xl"
       >
-        <div className="flex flex-col h-full max-h-[80vh]">
-          {/* Scrollable form content */}
-          <div className="flex-1 overflow-y-auto px-1">
-            <form className="space-y-6 pb-6" onSubmit={handleSubmit}>
-              {/* Basic Information */}
-              <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                <h3 className="text-sm font-bold text-foreground mb-4">
-                  Basic Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">
-                      {activeTab === "work"
-                        ? "Company / Organization"
-                        : "Institution"}
-                    </Label>
-                    <Input
-                      id="title"
-                      type="text"
-                      defaultValue={editingItem.item?.title}
-                      placeholder={
-                        activeTab === "work"
-                          ? "e.g., Tech Corp"
-                          : "e.g., University Name"
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">
-                      {activeTab === "work"
-                        ? "Position / Role"
-                        : "Degree / Program"}
-                    </Label>
-                    <Input
-                      id="role"
-                      type="text"
-                      defaultValue={editingItem.item?.role}
-                      placeholder={
-                        activeTab === "work"
-                          ? "e.g., Senior Developer"
-                          : "e.g., Bachelor of Science"
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Timeline & Visual */}
-              <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                <div className="flex items-center gap-2 mb-4">
-                  <Calendar size={16} className="text-primary" />
-                  <h3 className="text-sm font-bold text-foreground">
-                    Timeline & Visual
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="period">Time Period</Label>
-                    <Input
-                      id="period"
-                      type="text"
-                      defaultValue={editingItem.item?.period}
-                      placeholder="Jan 2024 - Present"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="icon">Icon Name</Label>
-                    <Input
-                      id="icon"
-                      type="text"
-                      defaultValue={editingItem.item?.icon}
-                      placeholder="Briefcase, GraduationCap, Code"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="accent">Accent Color</Label>
-                    <Input
-                      id="accent"
-                      type="color"
-                      defaultValue={editingItem.item?.accent || "#3b82f6"}
-                      className="h-10 cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                <h3 className="text-sm font-bold text-foreground mb-4">
-                  Description
-                </h3>
-                <Textarea
-                  id="description"
-                  defaultValue={editingItem.item?.description}
-                  placeholder="Describe your responsibilities, achievements, or what you learned..."
-                  rows={4}
-                  className="resize-none"
-                />
-              </div>
-
-              {/* Skills */}
-              <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                <div className="flex items-center gap-2 mb-4">
-                  <Tag size={16} className="text-primary" />
-                  <h3 className="text-sm font-bold text-foreground">
-                    Skills & Technologies
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  <Input
-                    id="skills"
-                    type="text"
-                    defaultValue={editingItem.item?.skills.join(", ")}
-                    placeholder="React, Node.js, TypeScript (comma-separated)"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Separate skills with commas
-                  </p>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                <h3 className="text-sm font-bold text-foreground mb-4">
-                  Status
-                </h3>
-                <RadioGroup
-                  defaultValue={editingItem.item?.status || "active"}
-                  name="status"
-                  className="flex items-center gap-4"
+        {activeTab === "work" ? (
+          <TimelineWorkForm
+            formId={formId}
+            initialData={editingItem}
+            onSubmit={handleItemSubmit}
+            footer={
+              <div className="flex justify-end gap-3 w-full">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                  Cnacel
+                </Button>
+                <Button
+                  disabled={isUpdating}
+                  form={formId}
+                  type="submit"
+                  className="rounded-xl px-10 h-12 shadow-xl shadow-blue-500/20"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="active" id="status-active" />
-                    <Label
-                      htmlFor="status-active"
-                      className="font-normal cursor-pointer"
-                    >
-                      Currently Active
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="past" id="status-past" />
-                    <Label
-                      htmlFor="status-past"
-                      className="font-normal cursor-pointer"
-                    >
-                      Past Position
-                    </Label>
-                  </div>
-                </RadioGroup>
+                  {isUpdating ? (
+                    <Activity size={18} className="animate-spin mr-2" />
+                  ) : (
+                    <Save size={18} className="mr-2" />
+                  )}
+                  {editingItem ? "Update the work" : "Finalize the work"}
+                </Button>
               </div>
-            </form>
-          </div>
-
-          {/* Form Actions - Sticky Footer */}
-          <div className="flex-shrink-0 flex justify-end gap-3 pt-4 pb-2 px-1 border-t border-border bg-background">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditingItem({ item: null, type: activeTab });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isUpdating}>
-              {isUpdating ? (
-                <>
-                  <Activity size={16} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  {editingItem.item ? "Update Entry" : "Add Entry"}
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Success Toast */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 right-6 z-[10000] bg-card border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 max-w-sm"
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle
-                size={20}
-                className="text-emerald-600 dark:text-emerald-400"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {editingItem.item ? "Entry updated" : "Entry added"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Changes saved successfully
-              </p>
-            </div>
-          </motion.div>
+            }
+          />
+        ) : (
+          <TimelineExperienceForm
+            formId={formId}
+            initialData={editingItem}
+            onSubmit={handleItemSubmit}
+            footer={
+              <div className="flex justify-end gap-3 w-full">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                  Cnacel
+                </Button>
+                <Button
+                  disabled={isUpdating}
+                  form={formId}
+                  type="submit"
+                  className="rounded-xl px-10 h-12 shadow-xl shadow-blue-500/20"
+                >
+                  {isUpdating ? (
+                    <Activity size={18} className="animate-spin mr-2" />
+                  ) : (
+                    <Save size={18} className="mr-2" />
+                  )}
+                  {editingItem
+                    ? "Update the experience"
+                    : "Finalize the experience"}
+                </Button>
+              </div>
+            }
+          />
         )}
-      </AnimatePresence>
+      </Modal>
     </div>
   );
 };
 
-export default AdminExperiencePage;
+export default AdminTimelinePage;

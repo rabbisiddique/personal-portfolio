@@ -52,19 +52,18 @@ export interface TechItem {
   // isVisible: boolean;
 }
 
+export type TimelineType = "work" | "experience";
+
 export interface TimelineEntry {
   id: string;
   year: string;
   title: string;
-  period: string;
   role: string;
   description: string;
   skills: string[];
   achievements: string[];
   icon: string;
   accent: string;
-  order: number;
-  status: "active" | "draft" | "archived";
 }
 
 export interface ProjectLinks {

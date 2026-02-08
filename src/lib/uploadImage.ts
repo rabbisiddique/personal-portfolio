@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase/client";
 
 export type ImageCategory =
   | "projects"
-  | "tech_icons"
+  | "icons_images"
   | "profile"
   | "blog"
   | "general";
@@ -28,7 +28,7 @@ export async function uploadImage({
   // Create folder path based on category
   const folderMap: Record<ImageCategory, string> = {
     projects: "projects_images",
-    tech_icons: "tech_icons",
+    icons_images: "icons_images",
     profile: "profile_images",
     blog: "blog_images",
     general: "general_images",
@@ -89,8 +89,8 @@ export async function deleteImage(imageUrl: string): Promise<void> {
 export const uploadProjectImage = (file: File) =>
   uploadImage({ category: "projects", file });
 
-export const uploadTechIcon = (file: File) =>
-  uploadImage({ category: "tech_icons", file });
+export const uploadIcon = (file: File) =>
+  uploadImage({ category: "icons_images", file });
 
 export const uploadProfileImage = (file: File) =>
   uploadImage({ category: "profile", file });
