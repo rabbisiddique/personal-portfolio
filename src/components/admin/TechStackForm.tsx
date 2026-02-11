@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 // import { uploadTechIcon } from "@/lib/uploadTechIcon";
-import { uploadTechIcon } from "@/lib/uploadImage";
+import { uploadIcon } from "@/lib/uploadImage";
 import { TechStackFormData, TechStackFormSchema } from "@/schemas/tech.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -97,7 +97,7 @@ export function TechForm({
       setIsUploadingIcon(true);
 
       // Upload to Supabase
-      const uploadedUrl = await uploadTechIcon(file);
+      const uploadedUrl = await uploadIcon(file);
 
       // Update form and preview
       form.setValue("icon", uploadedUrl, { shouldValidate: true });

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import { ChevronLeft, LogOut, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,7 +15,6 @@ interface AdminSidebarProps {
 import { supabase } from "@/lib/supabase/client";
 import {
   BarChart3,
-  Calendar,
   Folder,
   Home,
   MessageSquare,
@@ -55,11 +54,6 @@ export const NAV_ITEMS = [
     label: "Experience",
     icon: <Users size={18} />,
   },
-  {
-    id: "/admin/contact",
-    label: "Contact",
-    icon: <Calendar size={18} />,
-  },
 ];
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -83,7 +77,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }
   };
 
-  const sidebarVariants = {
+  const sidebarVariants: Variants = {
     open: { width: "16rem", transition: { duration: 0.3, ease: "easeInOut" } },
     collapsed: {
       width: "5rem",

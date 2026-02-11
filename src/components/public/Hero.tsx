@@ -121,7 +121,7 @@ const HeroPage = () => {
 
           <div className="relative">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-              I'm a <br className="md:hidden" />
+              I`m a <br className="md:hidden" />
               <span className="text-blue-500">
                 <TypeAnimation
                   sequence={[
