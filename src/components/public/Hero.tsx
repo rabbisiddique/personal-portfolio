@@ -1,10 +1,12 @@
 "use client";
+import { useHero } from "@/hooks/useHero";
 import { motion, useAnimation } from "framer-motion";
-import { ArrowRight, Terminal } from "lucide-react";
+import { Download, Terminal } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
+import HeroLoading from "../pbulic/HeroLoading";
 
 const HeroPage = () => {
   const { theme } = useTheme();
@@ -12,6 +14,15 @@ const HeroPage = () => {
   const [scrollY, setScrollY] = useState(0);
   const controls = useAnimation();
   const router = useRouter();
+  const { hero, isLoading } = useHero();
+  const sequence =
+    hero?.roles?.flatMap((item) => {
+      // Make sure it's a string array
+      if (Array.isArray(hero.roles)) {
+        return [item, 1000]; // ✅ Return this array
+      }
+      return []; // fallback
+    }) || [];
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -25,6 +36,10 @@ const HeroPage = () => {
       transition: { duration: 0 },
     });
   }, [scrollY, controls]);
+
+  if (isLoading) {
+    return <HeroLoading isDark="dark" />;
+  }
 
   return (
     <section
@@ -103,10 +118,10 @@ const HeroPage = () => {
               animate={{ opacity: 0.5 }}
               className="text-[11px] font-black uppercase tracking-[0.6em]"
             >
-              Establishing Connection...
+              {hero?.system_label}
             </motion.p>
             <h1 className="text-7xl md:text-9xl font-black leading-[0.85] tracking-[-0.04em]">
-              RABBI
+              {hero?.first_name}
               <br />
               <span
                 className="text-transparent"
@@ -114,7 +129,7 @@ const HeroPage = () => {
                   WebkitTextStroke: `1.5px ${isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}`,
                 }}
               >
-                SIDDIQUE
+                {hero?.last_name}
               </span>
             </h1>
           </div>
@@ -123,29 +138,21 @@ const HeroPage = () => {
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
               I`m a <br className="md:hidden" />
               <span className="text-blue-500">
-                <TypeAnimation
-                  sequence={[
-                    "Full-Stack Architect",
-                    2000,
-                    "UX Engineer",
-                    2000,
-                    "System Specialist",
-                    2000,
-                    "Node Expert",
-                    2000,
-                  ]}
-                  speed={50}
-                  repeat={Infinity}
-                  wrapper="span"
-                  cursor={true}
-                />
+                {sequence.length > 0 && (
+                  <TypeAnimation
+                    sequence={sequence}
+                    speed={50}
+                    repeat={Infinity}
+                    wrapper="span"
+                    cursor={true}
+                  />
+                )}
               </span>
             </h2>
           </div>
 
           <p className="text-lg md:text-xl font-medium max-w-lg opacity-50 leading-relaxed">
-            Architecting thoughtful, high-performance web products by merging
-            robust server-side logic with immersive interface design.
+            {hero?.description}
           </p>
 
           <div className="flex flex-wrap gap-8 pt-6">
@@ -161,7 +168,7 @@ const HeroPage = () => {
               whileTap={{ scale: 0.95 }}
               className={`px-12 py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.5em] flex items-center gap-6 transition-all shadow-2xl ${isDark ? "bg-white text-black" : "bg-black text-white"}`}
             >
-              Access Terminal <ArrowRight size={18} strokeWidth={3} />
+              {hero?.primary_button_text} <Download size={18} strokeWidth={3} />
             </motion.button>
           </div>
         </motion.div>
@@ -175,7 +182,7 @@ const HeroPage = () => {
             animate={{ y: [0, -15, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           >
-            FULLSTACK
+            {hero?.background_word_top}
           </motion.div>
 
           {/* Profile Representation Layer (Placeholder Circle for now, can be Image) */}
@@ -195,7 +202,7 @@ const HeroPage = () => {
                 }`}
               >
                 <img
-                  src="https://picsum.photos/800/800?grayscale"
+                  src={hero?.profile_image_url || "Not avilable"}
                   alt="Operator"
                   className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000 grayscale"
                 />
@@ -215,7 +222,7 @@ const HeroPage = () => {
               delay: 1,
             }}
           >
-            ENGINEER
+            {hero?.background_word_bottom}
           </motion.div>
 
           {/* Kinetic HUD Details */}
