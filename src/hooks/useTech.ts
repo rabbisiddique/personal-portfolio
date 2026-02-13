@@ -9,12 +9,13 @@ export function useTech() {
   const [teches, setTeches] = useState<TechItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Separate effect for initial fetch
   useEffect(() => {
     const fetchTeches = async () => {
       setIsLoading(true);
 
       const res = await getTechAction();
-      console.log(res);
+      console.log("Fetching techs:", res);
 
       if (res.data && res.data) {
         setTeches(res.data);
@@ -24,44 +25,51 @@ export function useTech() {
 
       setIsLoading(false);
     };
-
     fetchTeches();
+  }, []);
 
-    // Set up realtime subscription
+  // Separate effect for realtime subscription
+  useEffect(() => {
     const channel = supabase
       .channel("tech_stack_changes")
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "tech_stack",
         },
         (payload) => {
-          console.log("Change received!", payload);
+          console.log("Realtime change received!", payload);
 
           if (payload.eventType === "INSERT") {
-            setTeches((current) => [payload.new as TechItem, ...current]);
+            setTeches((current) => [...current, payload.new as TechItem]);
           } else if (payload.eventType === "UPDATE") {
             setTeches((current) =>
               current.map((tech) =>
-                tech.id === payload.new.id ? (payload.new as TechItem) : tech,
+                tech.id === (payload.new as TechItem).id
+                  ? (payload.new as TechItem)
+                  : tech,
               ),
             );
           } else if (payload.eventType === "DELETE") {
             setTeches((current) =>
-              current.filter((tech) => tech.id !== payload.old.id),
+              current.filter(
+                (tech) => tech.id !== (payload.old as TechItem).id,
+              ),
             );
           }
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
-    // Cleanup subscription on unmount
     return () => {
+      console.log("Unsubscribing from tech_stack channel");
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array - only subscribe once
 
   return {
     teches,

@@ -2,10 +2,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
-import { Tech } from "../../../types";
+import { TechItem } from "../../../admin.types";
 
 interface LogoGridProps {
-  techs: Tech[];
+  techs: TechItem[];
   accentColor: string;
 }
 
@@ -13,7 +13,7 @@ const LogoGrid: React.FC<LogoGridProps> = ({ techs, accentColor }) => {
   const [isScanning, setIsScanning] = useState(true);
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
+  console.log(techs);
   useEffect(() => {
     const timer = setTimeout(() => setIsScanning(false), 2000);
     return () => clearTimeout(timer);
@@ -40,7 +40,7 @@ const LogoGrid: React.FC<LogoGridProps> = ({ techs, accentColor }) => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 md:gap-6 pb-40">
         {techs.map((tech, i) => (
           <motion.div
-            key={`${tech.name}-${i}`}
+            key={`${tech.title}-${i}`}
             initial={{ opacity: 0, scale: 0.5, rotateX: 45, y: 50 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
             transition={{
@@ -71,7 +71,7 @@ const LogoGrid: React.FC<LogoGridProps> = ({ techs, accentColor }) => {
               >
                 <img
                   src={tech.icon}
-                  alt={tech.name}
+                  alt={tech.title}
                   className="w-1/2 h-1/2 md:w-3/5 md:h-3/5 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-110"
                 />
               </motion.div>
@@ -83,7 +83,7 @@ const LogoGrid: React.FC<LogoGridProps> = ({ techs, accentColor }) => {
                     isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}
                 >
-                  {tech.name}
+                  {tech.title}
                 </span>
               </div>
             </div>

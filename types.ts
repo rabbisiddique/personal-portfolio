@@ -1,22 +1,15 @@
 import { LucideIcon } from "lucide-react";
-
-export interface Tech {
-  name: string;
-  icon: string;
-  level: number;
-  category: string;
-  description: string;
-}
+import { TechItem } from "./admin.types";
 
 export interface Category {
   id: string;
   title: string;
   subtitle: string;
   icon: LucideIcon;
-  techs: Tech[];
-  description: string;
   colorClass: string;
   accentColor: string;
+  description: string;
+  techs: TechItem[]; // Changed from Tech[] to TechItem[]
 }
 
 export interface Feature {

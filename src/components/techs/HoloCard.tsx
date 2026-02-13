@@ -1,10 +1,11 @@
+"use client";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useTheme } from "next-themes";
 import React, { useRef, useState } from "react";
-import { Tech } from "../../../types";
+import { TechItem } from "../../../admin.types";
 
 interface HoloCardProps {
-  tech: Tech;
+  tech: TechItem;
   index: number;
   accentColor: string;
 }
@@ -119,7 +120,7 @@ const HoloCard: React.FC<HoloCardProps> = ({ tech, index, accentColor }) => {
           >
             <img
               src={tech.icon}
-              alt={tech.name}
+              alt={tech.title}
               className={`w-28 h-28 object-contain transition-all duration-700 ${
                 isDark
                   ? "drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]"
@@ -143,18 +144,20 @@ const HoloCard: React.FC<HoloCardProps> = ({ tech, index, accentColor }) => {
           {/* Bottom Row: Identification */}
           <div className="w-full text-center space-y-1">
             <h4
-              className={`text-3xl font-black tracking-tighter uppercase font-space transition-colors ${isDark ? "text-white" : "text-zinc-900"}`}
+              className={`text-3xl font-black tracking-tighter uppercase font-space transition-colors 
+                ${isDark ? "text-white" : "text-zinc-900"}`}
             >
-              {tech.name}
+              {tech.title}
             </h4>
             <div className="flex items-center justify-center gap-3">
               <div
                 className={`h-[1px] w-8 transition-colors ${isDark ? "bg-zinc-800" : "bg-zinc-200"}`}
               />
               <span
-                className={`text-[10px] font-black uppercase tracking-[0.4em] transition-colors ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
+                className={`text-[10px] font-black uppercase tracking-[0.4em] transition-colors
+                   ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
               >
-                {tech.category}
+                {tech.type}
               </span>
               <div
                 className={`h-[1px] w-8 transition-colors ${isDark ? "bg-zinc-800" : "bg-zinc-200"}`}
@@ -167,9 +170,10 @@ const HoloCard: React.FC<HoloCardProps> = ({ tech, index, accentColor }) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
-          className={`absolute inset-0 backdrop-blur-md p-10 flex flex-col items-center justify-center text-center z-20 transition-colors duration-700 ${
-            isDark ? "bg-black/80" : "bg-white/95"
-          }`}
+          className={`absolute inset-0 backdrop-blur-md p-10 flex flex-col items-center 
+            justify-center text-center z-20 transition-colors duration-700 ${
+              isDark ? "bg-black/80" : "bg-white/95"
+            }`}
         >
           <span
             className={`text-[10px] font-black uppercase tracking-[0.6em] mb-6 transition-colors ${isDark ? "text-zinc-500" : "text-zinc-400"}`}

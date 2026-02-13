@@ -80,7 +80,10 @@ export const deleteTechAction = async (techId: string) => {
 export const getTechAction = async () => {
   const supabase = await createServerSupabase();
   try {
-    const { data, error } = await supabase.from("tech_stack").select("*");
+    const { data, error } = await supabase
+      .from("tech_stack")
+      .select("*")
+      .order("created_at", { ascending: true }); // Oldest first (first added appears first);
 
     if (error) {
       return {

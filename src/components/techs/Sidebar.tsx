@@ -5,7 +5,7 @@ import React from "react";
 import { Category } from "../../../types";
 
 interface SidebarProps {
-  categories: Category[];
+  categories: Category[]; // Use the correct Category type
   activeTab: number;
   onTabChange: (idx: number) => void;
   currentDescription: string;
@@ -17,6 +17,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
   currentDescription,
 }) => {
+  console.log("category", categories);
+
   const { theme } = useTheme();
   const isDark = theme === "dark";
   return (
@@ -71,17 +73,17 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="flex items-center gap-4 mb-2">
                 <span
                   className={`text-6xl md:text-5xl font-black tracking-tighter leading-none
-                     transition-all duration-700 font-space ${
-                       activeTab === idx
-                         ? isDark
-                           ? "text-white"
-                           : "text-zinc-900"
-                         : isDark
-                           ? "text-zinc-800 group-hover:text-zinc-600"
-                           : "text-zinc-200 group-hover:text-zinc-400"
-                     }`}
+     transition-all duration-700 font-space ${
+       activeTab === idx
+         ? isDark
+           ? "text-white"
+           : "text-zinc-900"
+         : isDark
+           ? "text-zinc-800 group-hover:text-zinc-600"
+           : "text-zinc-200 group-hover:text-zinc-400"
+     }`}
                 >
-                  {cat.title}
+                  {cat?.title} {/* Changed from cat?.category to cat?.title */}
                 </span>
               </div>
 

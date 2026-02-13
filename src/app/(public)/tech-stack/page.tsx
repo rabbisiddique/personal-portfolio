@@ -1,29 +1,49 @@
 "use client";
 
+import PagesLoading from "@/components/public/loading/PagesLoading";
 import BackgroundMatrix from "@/components/techs/BackgroundMatrix";
 import HoloCard from "@/components/techs/HoloCard";
 import LogoGrid from "@/components/techs/LogoGrid";
 import SectionHeader from "@/components/techs/SectionHeader";
 import Sidebar from "@/components/techs/Sidebar";
 import StatsHUD from "@/components/techs/StatsHUD";
-import { CATEGORIES } from "@/data/tech.data";
+import { mergeCategoriesWithData } from "@/data/tech.data";
+import { useTech } from "@/hooks/useTech";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useMemo, useState } from "react";
+import { TechItem } from "../../../../admin.types";
 
 const TechStack = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const currentCategory = useMemo(() => CATEGORIES[activeTab], [activeTab]);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { teches, isLoading } = useTech();
+  console.log("mainpage", teches);
+
+  // Merge DB data with static category metadata
+  const categories = useMemo(() => {
+    if (!teches || teches.length === 0) return [];
+    return mergeCategoriesWithData(teches);
+  }, [teches]);
+
+  const currentCategory = useMemo(
+    () => categories[activeTab] || categories[0],
+    [activeTab, categories],
+  );
 
   // Aggregate all techs for the 'Stack' view
   const allTechs = useMemo(() => {
-    return CATEGORIES.filter((cat) => cat.id !== "stack").flatMap(
-      (cat) => cat.techs,
-    );
-  }, []);
-  const isStackView = currentCategory.id === "stack";
+    return categories
+      .filter((cat) => cat.id !== "stack")
+      .flatMap((cat) => cat.techs);
+  }, [categories]);
+
+  const isStackView = currentCategory?.id === "stack";
+
+  if (isLoading) {
+    return <PagesLoading isDark="dark" />;
+  }
 
   return (
     <div
@@ -43,10 +63,10 @@ const TechStack = () => {
 
       {/* 1. The Command Sidebar */}
       <Sidebar
-        categories={CATEGORIES}
+        categories={categories}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        currentDescription={currentCategory.description}
+        currentDescription={currentCategory?.description || ""}
       />
 
       {/* 2. Main Content Viewport */}
@@ -55,7 +75,7 @@ const TechStack = () => {
           {/* Section Heading */}
           <SectionHeader
             subtitle="Teches Infrastructure"
-            title={currentCategory.title}
+            title={currentCategory?.title || ""}
             suffix={isStackView ? "Wall" : "Matrix"}
           />
 
@@ -72,7 +92,7 @@ const TechStack = () => {
                 >
                   <LogoGrid
                     techs={allTechs}
-                    accentColor={currentCategory.accentColor}
+                    accentColor={currentCategory?.accentColor}
                   />
                 </motion.div>
               ) : (
@@ -84,9 +104,9 @@ const TechStack = () => {
                   transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                   className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32"
                 >
-                  {currentCategory.techs.map((tech, i) => (
+                  {currentCategory?.techs.map((tech: TechItem, i: number) => (
                     <HoloCard
-                      key={tech.name}
+                      key={tech.id}
                       tech={tech}
                       index={i}
                       accentColor={currentCategory.accentColor}
@@ -101,17 +121,20 @@ const TechStack = () => {
           <div className="mt-12">
             <StatsHUD
               techCount={
-                isStackView ? allTechs.length : currentCategory.techs.length
+                isStackView
+                  ? allTechs.length
+                  : currentCategory?.techs.length || 0
               }
-              avgLevel={Math.round(
-                (isStackView ? allTechs : currentCategory.techs).reduce(
-                  (a, b) => a + b.level,
-                  0,
-                ) /
-                  (isStackView
-                    ? allTechs.length
-                    : currentCategory.techs.length),
-              )}
+              avgLevel={
+                currentCategory?.techs.length
+                  ? Math.round(
+                      currentCategory.techs.reduce(
+                        (a, b) => a + (b.level || 0),
+                        0,
+                      ) / currentCategory.techs.length,
+                    )
+                  : 0
+              }
             />
           </div>
         </div>
