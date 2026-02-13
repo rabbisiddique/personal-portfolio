@@ -47,51 +47,6 @@ const HeroPage = () => {
         isDark ? "bg-[#020202] text-white" : "bg-[#fafafa] text-zinc-900"
       }`}
     >
-      {/* Background Architecture */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Grid Matrix Overlay */}
-        <div
-          className={`absolute inset-0 opacity-[0.1] ${isDark ? "invert" : ""}`}
-          style={{
-            backgroundImage: "radial-gradient(#000 0.5px, transparent 0.5px)",
-            backgroundSize: "30px 30px",
-          }}
-        />
-
-        {/* Rotating Geometric SVG */}
-        <motion.div
-          className="absolute left-[5%] top-[15%] w-[45vw] h-[45vw] opacity-[0.05]"
-          animate={controls}
-        >
-          <svg viewBox="0 0 400 400" className="w-full h-full">
-            {[...Array(6)].map((_, i) => (
-              <motion.path
-                key={i}
-                d={`M${50 + i * 20},${100 + i * 25} L${100 + i * 25},${50 + i * 20} L${150 + i * 20},${100 + i * 25} L${100 + i * 25},${150 + i * 20} Z`}
-                stroke={isDark ? "white" : "black"}
-                strokeWidth="0.8"
-                fill="none"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{
-                  duration: 3,
-                  delay: i * 0.2,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                }}
-              />
-            ))}
-          </svg>
-        </motion.div>
-
-        {/* Neural Glows */}
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className={`absolute -top-20 -right-20 w-[60vw] h-[60vw] blur-[150px] rounded-full ${isDark ? "bg-blue-600/20" : "bg-blue-400/10"}`}
-        />
-      </div>
-
       <div className="relative z-20 max-w-7xl mx-auto w-full px-8 grid lg:grid-cols-[1.1fr_0.9fr] gap-20 items-center">
         {/* Left Content */}
         <motion.div

@@ -9,8 +9,6 @@ export function useAbout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
     const fetchAbout = async () => {
       setIsLoading(true);
 
@@ -18,8 +16,6 @@ export function useAbout() {
         .from("about_content")
         .select("*")
         .single();
-
-      if (!isMounted) return;
 
       if (!error && data) {
         setAboutData({
@@ -38,10 +34,39 @@ export function useAbout() {
 
     fetchAbout();
 
+    const channel = supabase
+      .channel("about_content_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "about_content",
+        },
+        (payload) => {
+          if (
+            payload.eventType === "UPDATE" ||
+            payload.eventType === "INSERT"
+          ) {
+            const newData = payload.new;
+            setAboutData({
+              hero: newData.hero,
+              systemStats: newData.system_stats || [],
+              personalInfo: newData.personal_info || [],
+              expertise: newData.expertise || [],
+            });
+          }
+        },
+      )
+      .subscribe();
+
     return () => {
-      isMounted = false;
+      supabase.removeChannel(channel);
     };
   }, []);
+
+  // Real-time Supabase subscription
+  // useEffect(() => {}, [setAboutData]);
 
   return { aboutData, isLoading, setAboutData };
 }

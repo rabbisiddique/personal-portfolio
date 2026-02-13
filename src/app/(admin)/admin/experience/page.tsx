@@ -45,8 +45,6 @@ const AdminTimelinePage: React.FC = () => {
 
   const formId = "timeline-management-form";
 
-  console.log(data);
-
   const handleOpenModal = (item?: TimelineEntry) => {
     setEditingItem(item || null);
     setIsModalOpen(true);
@@ -242,7 +240,10 @@ const AdminTimelinePage: React.FC = () => {
                                 <div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
                                   <div className="flex gap-6 items-start">
                                     <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] flex items-center justify-center border border-slate-100 dark:border-slate-700 shrink-0 overflow-hidden p-3">
-                                      {/* <SmartIcon icon={entry.icon} className="w-full h-full text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-500" /> */}
+                                      <SmartIcon
+                                        icon={entry.icon}
+                                        className="w-full h-full text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-500"
+                                      />
                                     </div>
                                     <div className="space-y-4">
                                       <div className="flex items-center gap-2">

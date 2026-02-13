@@ -12,13 +12,13 @@ import {
   updateStatAction,
 } from "@/action/admin/about.action";
 import SkeletonHero from "@/components/admin/SkeletonHero";
+import SmartIcon from "@/components/admin/SmartIcon";
 import Modal from "@/components/reuse/Modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAbout } from "@/hooks/useAbout";
-import { supabase } from "@/lib/supabase/client";
 import {
   ABOUT_DEFAULT_VALUES,
   AboutContentSchema,
@@ -32,9 +32,18 @@ import {
 import { handleErrorWithToast } from "@/utils/handleErrorWithToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Activity, Camera, Edit3, Plus, Save, Trash2 } from "lucide-react";
+import {
+  Activity,
+  Camera,
+  Edit3,
+  ImageIcon,
+  Info,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 import { AboutData } from "../../../../../admin.types";
@@ -67,9 +76,16 @@ const AdminAboutPage: React.FC = () => {
       id: "",
       label: "",
       value: "",
+
       icon: "",
       color: "#000000",
     },
+  });
+
+  // Watch icon value for live preview
+  const currentStatsIcon = useWatch({
+    control: statsForm.control,
+    name: "icon",
   });
 
   // Personal Info form with Zod
@@ -80,9 +96,13 @@ const AdminAboutPage: React.FC = () => {
       label: "",
       value: "",
       icon: "",
+      color: "",
       highlight: false,
     },
   });
+
+  // Watch icon value for live preview
+  const currentInfoIcon = useWatch({ control: infoForm.control, name: "icon" });
 
   // Expertise form with Zod
   const expertiseForm = useForm<z.infer<typeof ExpertiseSchema>>({
@@ -91,10 +111,18 @@ const AdminAboutPage: React.FC = () => {
       id: "",
       title: "",
       description: "",
-      extra_description: "", // This is fine even if optional
+      extra_description: "",
       icon: "",
+      color: "#000000",
+      accent_color: "",
       level: "",
     },
+  });
+
+  // Watch icon value for live preview
+  const currentExpertiseIcon = useWatch({
+    control: expertiseForm.control,
+    name: "icon",
   });
 
   // Hero Submit Handler
@@ -204,6 +232,7 @@ const AdminAboutPage: React.FC = () => {
         label: "",
         value: "",
         icon: "",
+        color: "",
         highlight: false,
       });
     } catch (error: unknown) {
@@ -256,6 +285,8 @@ const AdminAboutPage: React.FC = () => {
         description: "",
         extra_description: "",
         icon: "",
+        color: "",
+        accent_color: "",
         level: "",
       });
     } catch (error: unknown) {
@@ -303,6 +334,7 @@ const AdminAboutPage: React.FC = () => {
               icon: info.icon || "",
               label: info.label || "",
               value: info.value || "",
+              color: info.color || "",
               highlight: info.highlight || false,
             }),
           ),
@@ -313,6 +345,7 @@ const AdminAboutPage: React.FC = () => {
             description: exp.description || "",
             extra_description: exp.extra_description || "",
             icon: exp.icon || "",
+            color: "" || "",
             level: exp.level || "",
           })),
         });
@@ -364,7 +397,6 @@ const AdminAboutPage: React.FC = () => {
       if (
         "highlight" in editingItem &&
         "label" in editingItem &&
-        !("color" in editingItem) &&
         !("title" in editingItem)
       ) {
         infoForm.reset({
@@ -372,6 +404,7 @@ const AdminAboutPage: React.FC = () => {
           label: editingItem.label || "",
           value: editingItem.value || "",
           icon: editingItem.icon || "",
+          color: editingItem.color || "",
           highlight: editingItem.highlight || false,
         });
       }
@@ -381,6 +414,7 @@ const AdminAboutPage: React.FC = () => {
         label: "",
         value: "",
         icon: "",
+        color: "",
         highlight: false,
       });
     }
@@ -401,6 +435,8 @@ const AdminAboutPage: React.FC = () => {
               ? editingItem.extra_description || ""
               : "",
           icon: editingItem.icon || "",
+          accent_color: editingItem.accent_color || "",
+          color: editingItem.color || "",
           level: editingItem.level || "",
         });
       }
@@ -412,6 +448,8 @@ const AdminAboutPage: React.FC = () => {
         extra_description: "",
         icon: "",
         level: "",
+        color: "",
+        accent_color: "",
       });
     }
   }, [
@@ -423,38 +461,6 @@ const AdminAboutPage: React.FC = () => {
     infoForm,
     expertiseForm,
   ]);
-  // Real-time Supabase subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel("about_content_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "about_content",
-        },
-        (payload) => {
-          if (
-            payload.eventType === "UPDATE" ||
-            payload.eventType === "INSERT"
-          ) {
-            const newData = payload.new;
-            setAboutData({
-              hero: newData.hero,
-              systemStats: newData.system_stats || [],
-              personalInfo: newData.personal_info || [],
-              expertise: newData.expertise || [],
-            });
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [setAboutData]);
 
   if (isLoading) {
     return <SkeletonHero />;
@@ -581,9 +587,11 @@ const AdminAboutPage: React.FC = () => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center">
-                    <span className="text-primary text-xs font-bold">
-                      {stat.icon?.substring(0, 2) || "ST"}
-                    </span>
+                    <SmartIcon
+                      icon={stat.icon}
+                      className="text-primary"
+                      size={20}
+                    />
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -655,9 +663,11 @@ const AdminAboutPage: React.FC = () => {
               >
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary text-xs font-bold">
-                      {info.icon?.substring(0, 2) || "IN"}
-                    </span>
+                    <SmartIcon
+                      icon={info.icon}
+                      className="text-primary"
+                      size={20}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground mb-1">
@@ -733,9 +743,11 @@ const AdminAboutPage: React.FC = () => {
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-lg bg-background border border-border flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary text-sm font-bold">
-                      {item.icon?.substring(0, 2) || "SK"}
-                    </span>
+                    <SmartIcon
+                      icon={item.icon}
+                      className="text-primary"
+                      size={24}
+                    />
                   </div>
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start justify-between">
@@ -746,9 +758,11 @@ const AdminAboutPage: React.FC = () => {
                         <p className="text-sm text-muted-foreground mt-1">
                           {item.description}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {item.extra_description}
-                        </p>
+                        {item.extra_description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.extra_description}
+                          </p>
+                        )}
                       </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -942,65 +956,137 @@ const AdminAboutPage: React.FC = () => {
             <h3 className="text-sm font-bold text-foreground mb-4">
               Statistic Details
             </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                  name="label"
-                  control={statsForm.control}
-                  render={({ field }) => (
-                    <div className="space-y-2">
-                      <Label>Label</Label>
-                      <Input
-                        {...field}
-                        placeholder="e.g., Projects Completed"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Icon Preview */}
+              <div className="space-y-4">
+                <Label>Icon Preview</Label>
+                <div
+                  className={`aspect-square rounded-2xl border-4 border-dashed flex flex-col items-center justify-center transition-all duration-500 overflow-hidden relative ${
+                    currentStatsIcon
+                      ? "border-primary/30 bg-primary/5"
+                      : "border-border bg-muted"
+                  }`}
+                >
+                  {currentStatsIcon ? (
+                    <div className="w-full h-full p-8 flex items-center justify-center">
+                      <SmartIcon
+                        icon={currentStatsIcon}
+                        className="w-full h-full text-primary"
                       />
-                      {statsForm.formState.errors.label && (
-                        <p className="text-sm text-red-500">
-                          {statsForm.formState.errors.label.message}
-                        </p>
-                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground px-4">
+                      <ImageIcon
+                        size={32}
+                        className="mx-auto mb-2 opacity-30"
+                      />
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em]">
+                        Icon Preview
+                      </p>
                     </div>
                   )}
-                />
-                <Controller
-                  name="value"
-                  control={statsForm.control}
-                  render={({ field }) => (
-                    <div className="space-y-2">
-                      <Label>Value</Label>
-                      <Input {...field} placeholder="e.g., 50+" />
-                      {statsForm.formState.errors.value && (
-                        <p className="text-sm text-red-500">
-                          {statsForm.formState.errors.value.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                  name="icon"
-                  control={statsForm.control}
-                  render={({ field }) => (
-                    <div className="space-y-2">
-                      <Label>Icon Name</Label>
-                      <Input {...field} placeholder="e.g., Award, Activity" />
-                      {statsForm.formState.errors.icon && (
-                        <p className="text-sm text-red-500">
-                          {statsForm.formState.errors.icon.message}
+
+              {/* Form Fields */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Controller
+                    name="label"
+                    control={statsForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Label</Label>
+                        <Input
+                          {...field}
+                          placeholder="e.g., Projects Completed"
+                        />
+                        {statsForm.formState.errors.label && (
+                          <p className="text-sm text-red-500">
+                            {statsForm.formState.errors.label.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="value"
+                    control={statsForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Value</Label>
+                        <Input {...field} placeholder="e.g., 50+" />
+                        {statsForm.formState.errors.value && (
+                          <p className="text-sm text-red-500">
+                            {statsForm.formState.errors.value.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Icon Name</Label>
+                    <Info
+                      size={12}
+                      className="text-muted-foreground cursor-help"
+                    />
+                  </div>
+                  <Controller
+                    name="icon"
+                    control={statsForm.control}
+                    render={({ field }) => (
+                      <>
+                        <Input
+                          {...field}
+                          placeholder="e.g., Award, Activity, TrendingUp"
+                          className="font-mono text-xs"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Visit{" "}
+                          <a
+                            href="https://lucide.dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            lucide.dev
+                          </a>{" "}
+                          for icon names
                         </p>
-                      )}
-                    </div>
-                  )}
-                />
+                        {statsForm.formState.errors.icon && (
+                          <p className="text-sm text-red-500">
+                            {statsForm.formState.errors.icon.message}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  />
+                </div>
+
                 <Controller
                   name="color"
                   control={statsForm.control}
                   render={({ field }) => (
                     <div className="space-y-2">
-                      <Label>Color</Label>
-                      <Input type="color" {...field} />
+                      <Label>Color (Hex Code)</Label>
+                      <Input
+                        {...field}
+                        placeholder="#3b82f6"
+                        className="font-mono text-xs"
+                      />
+                      {field.value && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className="w-6 h-6 rounded border border-border"
+                            style={{ backgroundColor: field.value }}
+                          />
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {field.value}
+                          </span>
+                        </div>
+                      )}
                       {statsForm.formState.errors.color && (
                         <p className="text-sm text-red-500">
                           {statsForm.formState.errors.color.message}
@@ -1058,78 +1144,167 @@ const AdminAboutPage: React.FC = () => {
             <h3 className="text-sm font-bold text-foreground mb-4">
               Information Details
             </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Icon Preview */}
+              <div className="space-y-4">
+                <Label>Icon Preview</Label>
+                <div
+                  className={`aspect-square rounded-2xl border-4 border-dashed flex flex-col items-center justify-center transition-all duration-500 overflow-hidden relative ${
+                    currentInfoIcon
+                      ? "border-primary/30 bg-primary/5"
+                      : "border-border bg-muted"
+                  }`}
+                >
+                  {currentInfoIcon ? (
+                    <div className="w-full h-full p-8 flex items-center justify-center">
+                      <SmartIcon
+                        icon={currentInfoIcon}
+                        className="w-full h-full text-primary"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground px-4">
+                      <ImageIcon
+                        size={32}
+                        className="mx-auto mb-2 opacity-30"
+                      />
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em]">
+                        Icon Preview
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Controller
+                    name="label"
+                    control={infoForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Label</Label>
+                        <Input {...field} placeholder="e.g., Location, Email" />
+                        {infoForm.formState.errors.label && (
+                          <p className="text-sm text-red-500">
+                            {infoForm.formState.errors.label.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="value"
+                    control={infoForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Value</Label>
+                        <Input
+                          {...field}
+                          placeholder="e.g., New York, email@example.com"
+                        />
+                        {infoForm.formState.errors.value && (
+                          <p className="text-sm text-red-500">
+                            {infoForm.formState.errors.value.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Icon Name</Label>
+                    <Info
+                      size={12}
+                      className="text-muted-foreground cursor-help"
+                    />
+                  </div>
+                  <Controller
+                    name="icon"
+                    control={infoForm.control}
+                    render={({ field }) => (
+                      <>
+                        <Input
+                          {...field}
+                          placeholder="e.g., MapPin, Mail, Phone"
+                          className="font-mono text-xs"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Visit{" "}
+                          <a
+                            href="https://lucide.dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            lucide.dev
+                          </a>{" "}
+                          for icon names
+                        </p>
+                        {infoForm.formState.errors.icon && (
+                          <p className="text-sm text-red-500">
+                            {infoForm.formState.errors.icon.message}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  />
+                </div>
                 <Controller
-                  name="label"
+                  name="highlight"
                   control={infoForm.control}
                   render={({ field }) => (
-                    <div className="space-y-2">
-                      <Label>Label</Label>
-                      <Input {...field} placeholder="e.g., Location, Email" />
-                      {infoForm.formState.errors.label && (
-                        <p className="text-sm text-red-500">
-                          {infoForm.formState.errors.label.message}
-                        </p>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="highlight"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-primary/20"
+                      />
+                      <label
+                        htmlFor="highlight"
+                        className="text-sm font-medium text-foreground"
+                      >
+                        Highlight this field (use primary color)
+                      </label>
                     </div>
                   )}
                 />
+
                 <Controller
-                  name="value"
+                  name="color"
                   control={infoForm.control}
                   render={({ field }) => (
                     <div className="space-y-2">
-                      <Label>Value</Label>
+                      <Label>Color (Hex Code)</Label>
                       <Input
                         {...field}
-                        placeholder="e.g., New York, email@example.com"
+                        placeholder="#3b82f6"
+                        className="font-mono text-xs"
                       />
-                      {infoForm.formState.errors.value && (
+                      {field.value && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className="w-6 h-6 rounded border border-border"
+                            style={{ backgroundColor: field.value }}
+                          />
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {field.value}
+                          </span>
+                        </div>
+                      )}
+                      {infoForm.formState.errors.color && (
                         <p className="text-sm text-red-500">
-                          {infoForm.formState.errors.value.message}
+                          {infoForm.formState.errors.color.message}
                         </p>
                       )}
                     </div>
                   )}
                 />
               </div>
-              <Controller
-                name="icon"
-                control={infoForm.control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label>Icon Name</Label>
-                    <Input {...field} placeholder="e.g., MapPin, Mail" />
-                    {infoForm.formState.errors.icon && (
-                      <p className="text-sm text-red-500">
-                        {infoForm.formState.errors.icon.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-              <Controller
-                name="highlight"
-                control={infoForm.control}
-                render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="highlight"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                    <label
-                      htmlFor="highlight"
-                      className="text-sm font-medium text-foreground"
-                    >
-                      Highlight this field (use primary color)
-                    </label>
-                  </div>
-                )}
-              />
             </div>
           </div>
 
@@ -1179,99 +1354,222 @@ const AdminAboutPage: React.FC = () => {
             <h3 className="text-sm font-bold text-foreground mb-4">
               Skill Details
             </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Icon Preview */}
+              <div className="space-y-4">
+                <Label>Icon Preview</Label>
+                <div
+                  className={`aspect-square rounded-2xl border-4 border-dashed flex flex-col items-center justify-center transition-all duration-500 overflow-hidden relative ${
+                    currentExpertiseIcon
+                      ? "border-primary/30 bg-primary/5"
+                      : "border-border bg-muted"
+                  }`}
+                >
+                  {currentExpertiseIcon ? (
+                    <div className="w-full h-full p-8 flex items-center justify-center">
+                      <SmartIcon
+                        icon={currentExpertiseIcon}
+                        className="w-full h-full text-primary"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground px-4">
+                      <ImageIcon
+                        size={32}
+                        className="mx-auto mb-2 opacity-30"
+                      />
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em]">
+                        Icon Preview
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Controller
+                    name="title"
+                    control={expertiseForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Skill Name</Label>
+                        <Input
+                          {...field}
+                          placeholder="e.g., Frontend Development"
+                        />
+                        {expertiseForm.formState.errors.title && (
+                          <p className="text-sm text-red-500">
+                            {expertiseForm.formState.errors.title.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="level"
+                    control={expertiseForm.control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <Label>Proficiency Level (%)</Label>
+                        <Input
+                          type="text"
+                          {...field}
+                          placeholder="Enter your level"
+                        />
+                        {expertiseForm.formState.errors.level && (
+                          <p className="text-sm text-red-500">
+                            {expertiseForm.formState.errors.level.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Icon Name</Label>
+                    <Info
+                      size={12}
+                      className="text-muted-foreground cursor-help"
+                    />
+                  </div>
+                  <Controller
+                    name="icon"
+                    control={expertiseForm.control}
+                    render={({ field }) => (
+                      <>
+                        <Input
+                          {...field}
+                          placeholder="e.g., Code, Palette, Database"
+                          className="font-mono text-xs"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Visit{" "}
+                          <a
+                            href="https://lucide.dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            lucide.dev
+                          </a>{" "}
+                          for icon names
+                        </p>
+                        {expertiseForm.formState.errors.icon && (
+                          <p className="text-sm text-red-500">
+                            {expertiseForm.formState.errors.icon.message}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  />
+                </div>
                 <Controller
-                  name="title"
+                  name="description"
                   control={expertiseForm.control}
                   render={({ field }) => (
                     <div className="space-y-2">
-                      <Label>Skill Name</Label>
-                      <Input
+                      <Label>Description</Label>
+                      <Textarea
                         {...field}
-                        placeholder="e.g., Frontend Development"
+                        placeholder="Describe your expertise in this area..."
+                        rows={3}
                       />
-                      {expertiseForm.formState.errors.title && (
+                      {expertiseForm.formState.errors.description && (
                         <p className="text-sm text-red-500">
-                          {expertiseForm.formState.errors.title.message}
+                          {expertiseForm.formState.errors.description.message}
                         </p>
                       )}
                     </div>
                   )}
                 />
                 <Controller
-                  name="level"
+                  name="extra_description"
                   control={expertiseForm.control}
                   render={({ field }) => (
                     <div className="space-y-2">
-                      <Label>Proficiency Level (%)</Label>
-                      <Input
-                        type="text"
+                      <Label>Extra Description</Label>
+                      <Textarea
                         {...field}
-                        placeholder="Enter your level"
+                        placeholder="Extra description your expertise in this area..."
+                        rows={3}
                       />
-                      {expertiseForm.formState.errors.level && (
+                      {expertiseForm.formState.errors.extra_description && (
                         <p className="text-sm text-red-500">
-                          {expertiseForm.formState.errors.level.message}
+                          {
+                            expertiseForm.formState.errors.extra_description
+                              .message
+                          }
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  name="color"
+                  control={expertiseForm.control}
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <Label>Color (Hex Code)</Label>
+                      <Input
+                        {...field}
+                        placeholder="#3b82f6"
+                        className="font-mono text-xs"
+                      />
+                      {field.value && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className="w-6 h-6 rounded border border-border"
+                            style={{ backgroundColor: field.value }}
+                          />
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {field.value}
+                          </span>
+                        </div>
+                      )}
+                      {expertiseForm.formState.errors.color && (
+                        <p className="text-sm text-red-500">
+                          {expertiseForm.formState.errors.color.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  name="accent_color"
+                  control={expertiseForm.control}
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <Label>accent_color (Hex Code)</Label>
+                      <Input
+                        {...field}
+                        placeholder="#3b82f6"
+                        className="font-mono text-xs"
+                      />
+                      {field.value && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className="w-6 h-6 rounded border border-border"
+                            style={{ backgroundColor: field.value }}
+                          />
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {field.value}
+                          </span>
+                        </div>
+                      )}
+                      {expertiseForm.formState.errors.accent_color && (
+                        <p className="text-sm text-red-500">
+                          {expertiseForm.formState.errors.accent_color.message}
                         </p>
                       )}
                     </div>
                   )}
                 />
               </div>
-              <Controller
-                name="icon"
-                control={expertiseForm.control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label>Icon Name</Label>
-                    <Input {...field} placeholder="e.g., Code, Palette" />
-                    {expertiseForm.formState.errors.icon && (
-                      <p className="text-sm text-red-500">
-                        {expertiseForm.formState.errors.icon.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-              <Controller
-                name="description"
-                control={expertiseForm.control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea
-                      {...field}
-                      placeholder="Describe your expertise in this area..."
-                      rows={3}
-                    />
-                    {expertiseForm.formState.errors.description && (
-                      <p className="text-sm text-red-500">
-                        {expertiseForm.formState.errors.description.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-              <Controller
-                name="extra_description"
-                control={expertiseForm.control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label>Extra Description</Label>
-                    <Textarea
-                      {...field}
-                      placeholder="Extra_description your expertise in this area..."
-                      rows={3}
-                    />
-                    {expertiseForm.formState.errors.description && (
-                      <p className="text-sm text-red-500">
-                        {expertiseForm.formState.errors.description.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
             </div>
           </div>
 

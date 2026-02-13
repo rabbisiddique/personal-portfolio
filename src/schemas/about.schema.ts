@@ -24,6 +24,7 @@ export const PersonalInfoSchema = z.object({
   label: z.string().min(1, { message: "label is required" }),
   value: z.string().min(1, { message: "value is required" }),
   icon: z.string().min(1, { message: "icon is required" }),
+  color: z.string(),
   highlight: z.boolean().optional(),
 });
 
@@ -32,6 +33,8 @@ export const ExpertiseSchema = z.object({
   title: z.string().min(1, { message: "title is required" }),
   description: z.string().min(1, { message: "description is required" }),
   icon: z.string().min(1, { message: "icon is required" }),
+  color: z.string(),
+  accent_color: z.string(),
   level: z.string().min(1, "Level is required"), // Keep as string or change to number
   extra_description: z.string(), // Remove .optional() or .default()
 });

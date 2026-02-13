@@ -106,6 +106,7 @@ export interface AboutData {
     value: string;
     icon: string;
     highlight?: boolean;
+    color: string;
   }[];
   expertise: {
     id: string;
@@ -113,6 +114,9 @@ export interface AboutData {
     description: string;
     extra_description: string;
     icon: string;
+    color: string;
+    accent_color: string; // ← THIS is missing
+
     level: string;
   }[];
 }

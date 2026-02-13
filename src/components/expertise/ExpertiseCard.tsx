@@ -1,6 +1,9 @@
+"use client";
+import { ExpertiseData } from "@/schemas/about.schema";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
+import SmartIcon from "../admin/SmartIcon";
 import { ExpandableContent } from "./ExpandableContent";
 
 export const ExpertiseCard = ({
@@ -8,7 +11,7 @@ export const ExpertiseCard = ({
   isExpanded,
   onToggle,
 }: {
-  item: any;
+  item: ExpertiseData;
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
@@ -25,14 +28,26 @@ export const ExpertiseCard = ({
       >
         <div className="space-y-6 flex-1">
           {/* Icon */}
-          <div
-            className={`inline-flex items-center justify-center p-5 rounded-2xl text-white shadow-lg ${item.iconBg}`}
-            style={{
-              boxShadow:
-                "inset 0 2px 6px rgba(255,255,255,.3), inset 0 -2px 6px rgba(0,0,0,.2)",
-            }}
-          >
-            {item.icon}
+          <div className="flex justify-between items-center">
+            <div
+              className={`inline-flex items-center justify-center p-5 rounded-2xl text-white shadow-lg ${item.color}`}
+              style={{
+                boxShadow:
+                  "inset 0 2px 6px rgba(255,255,255,.3), inset 0 -2px 6px rgba(0,0,0,.2)",
+                backgroundColor: item.color,
+              }}
+            >
+              <SmartIcon icon={item.icon} className="w-8 h-8" size={20} />
+            </div>
+            <span
+              className={`text-[10px] font-black uppercase tracking-widest
+                   px-3 py-1 rounded-full ${
+                     isDark ? "text-white" : "text-zinc-900"
+                   }`}
+              style={{ backgroundColor: item.accent_color }}
+            >
+              {item.level}
+            </span>
           </div>
 
           {/* Content */}
@@ -45,13 +60,6 @@ export const ExpertiseCard = ({
               >
                 {item.title}
               </h3>
-              <span
-                className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${item.accentColor} ${
-                  isDark ? "text-white" : "text-zinc-900"
-                }`}
-              >
-                {item.stats}
-              </span>
             </div>
 
             <p
@@ -73,7 +81,7 @@ export const ExpertiseCard = ({
                     isDark ? "text-zinc-300" : "text-zinc-500"
                   }`}
                 >
-                  {item.fullDescription}
+                  {item.extra_description}
                 </p>
               </div>
             </ExpandableContent>
@@ -100,7 +108,8 @@ export const ExpertiseCard = ({
 
       {/* Glow Sweep */}
       <div
-        className={`absolute inset-0 rounded-[2.5rem] pointer-events-none transition-opacity duration-700 opacity-0 group-hover:opacity-5 blur-3xl z-0 ${item.iconBg}`}
+        className={`absolute inset-0 rounded-[2.5rem] pointer-events-none transition-opacity duration-700 opacity-0 
+          group-hover:opacity-5 blur-3xl z-0 ${item.accent_color}`}
       />
     </motion.div>
   );
