@@ -1,15 +1,16 @@
 "use client";
-import { AI_EXPERIMENTS } from "@/data/ai_labs.data";
+import PagesLoading from "@/components/public/loading/PagesLoading";
+import { useAiLabs } from "@/hooks/useAiLabs";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Activity,
   BarChart3,
   Bot,
   BrainCircuit,
-  ChevronLeft,
   Construction,
   Cpu,
   FileSearch,
+  LucideIcon,
   Maximize2,
   MessageSquare,
   Send,
@@ -21,9 +22,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import React, { useRef } from "react";
-import { LabExperiment } from "../../../../types";
+import { LabExperiment } from "../../../../admin.types";
 
 const ArchitecturalLabel = ({ label }: { label: string }) => (
   <div className="flex items-center gap-3 mb-6 opacity-40 group-hover:opacity-100 transition-all duration-500">
@@ -32,7 +32,7 @@ const ArchitecturalLabel = ({ label }: { label: string }) => (
       <div className="w-8 h-[1px] bg-blue-500/50 mt-0.5" />
     </div>
     <span className="text-[9px] font-mono uppercase tracking-[0.3em] font-black">
-      Ref_Module: {label}
+      Core Module: {label}
     </span>
   </div>
 );
@@ -52,7 +52,7 @@ const Hero = () => {
         }`}
       >
         <Sparkles size={16} className="animate-pulse" />
-        Neural Sandbox • Interface v4.0.1
+        Full-Stack Portfolio • Interface v1.0
       </motion.div>
 
       <div className="space-y-6">
@@ -77,8 +77,8 @@ const Hero = () => {
           <p
             className={`text-2xl md:text-3xl font-medium leading-tight max-w-3xl opacity-60 tracking-tight ${isDark ? "text-zinc-400" : "text-zinc-600"}`}
           >
-            Fusing high-performance system logic with generative intelligence to
-            architect the next era of professional interfaces.
+            A collection of full-stack systems I’ve engineered —
+            production-ready, scalable, and interactive interfaces.
           </p>
 
           <div
@@ -97,7 +97,8 @@ const Hero = () => {
                   Philosophy_Check
                 </span>
                 <p className="text-xs font-bold opacity-70">
-                  No gimmicks. Only purpose-driven intelligence.
+                  No fluff. Just functional, reliable, and production-ready
+                  systems.
                 </p>
               </div>
             </div>
@@ -107,8 +108,8 @@ const Hero = () => {
             <p
               className={`text-xs font-medium max-w-sm text-left italic ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
             >
-              The goal is not to replace human creativity, but to provide a 10x
-              multiplier for technical clarity.
+              Every project here is designed to solve real problems and
+              demonstrate my end-to-end full-stack capabilities.
             </p>
           </div>
         </motion.div>
@@ -118,36 +119,12 @@ const Hero = () => {
 };
 
 const ChatPreview = ({ theme }: { theme: "dark" | "light" }) => {
+  const { data, isLoading } = useAiLabs();
   const isDark = theme === "dark";
-  const examplePrompts = [
-    "Summarize your best project",
-    "What tech stack do you recommend for a SaaS?",
-    "Are you available for full-time roles?",
-  ];
-
-  const messages = [
-    {
-      role: "bot",
-      content:
-        "Welcome to AI Labs. I can answer questions about my projects, tools, and how I build scalable web applications.",
-      time: "14:02",
-    },
-    {
-      role: "user",
-      content: "How do you optimize performance in your projects?",
-      time: "14:03",
-    },
-    {
-      role: "bot",
-      content:
-        "I focus on performance by using Next.js App Router, server components where appropriate, optimized image loading, and lightweight animations with Framer Motion. I also prioritize clean component structure and minimal re-renders.",
-      time: "14:03",
-    },
-  ];
 
   return (
     <div className="group max-w-5xl mx-auto">
-      <ArchitecturalLabel label="AIChatInterface" />
+      <ArchitecturalLabel label="AI Chat Interface" />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -211,48 +188,60 @@ const ChatPreview = ({ theme }: { theme: "dark" | "light" }) => {
 
         {/* Chat Feed */}
         <div className="p-10 space-y-8 h-[500px] overflow-y-auto no-scrollbar relative z-10 flex flex-col">
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: msg.role === "user" ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + i * 0.2 }}
-              className={`flex gap-4 max-w-[85%] ${msg.role === "user" ? "self-end flex-row-reverse" : "self-start"}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center shadow-lg ${
-                  msg.role === "user"
-                    ? isDark
-                      ? "bg-zinc-800 text-white"
-                      : "bg-zinc-100 text-zinc-900"
-                    : "bg-blue-600 text-white"
-                }`}
-              >
-                {msg.role === "user" ? <User size={18} /> : <Bot size={18} />}
-              </div>
-              <div className="space-y-1.5">
-                <div
-                  className={`p-6 rounded-[2rem] text-sm font-medium leading-relaxed shadow-xl ${
-                    msg.role === "user"
-                      ? isDark
-                        ? "bg-white text-black"
-                        : "bg-zinc-900 text-white"
-                      : isDark
-                        ? "bg-zinc-800/80 text-zinc-100 border border-white/10 backdrop-blur-xl"
-                        : "bg-white text-zinc-800 border border-zinc-200 shadow-blue-500/5"
-                  } ${msg.role === "user" ? "rounded-tr-none" : "rounded-tl-none"}`}
+          {data?.chat?.messages.length === 0 ? (
+            <p className="text-center font-light font-heading text-[20px] text-blue-300">
+              No chat messages
+            </p>
+          ) : (
+            <>
+              {data?.chat?.messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: msg.role === "user" ? 20 : -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + i * 0.2 }}
+                  className={`flex gap-4 max-w-[85%] ${msg.role === "user" ? "self-end flex-row-reverse" : "self-start"}`}
                 >
-                  {msg.content}
-                </div>
-                <div
-                  className={`text-[9px] font-black uppercase tracking-widest opacity-30 ${msg.role === "user" ? "text-right" : "text-left"}`}
-                >
-                  {msg.time} •{" "}
-                  {msg.role === "bot" ? "SENT BY CORE" : "CLIENT UPLINK"}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                  <div
+                    className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center shadow-lg ${
+                      msg.role === "user"
+                        ? isDark
+                          ? "bg-zinc-800 text-white"
+                          : "bg-zinc-100 text-zinc-900"
+                        : "bg-blue-600 text-white"
+                    }`}
+                  >
+                    {msg.role === "user" ? (
+                      <User size={18} />
+                    ) : (
+                      <Bot size={18} />
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <div
+                      className={`p-6 rounded-[2rem] text-sm font-medium leading-relaxed shadow-xl ${
+                        msg.role === "user"
+                          ? isDark
+                            ? "bg-white text-black"
+                            : "bg-zinc-900 text-white"
+                          : isDark
+                            ? "bg-zinc-800/80 text-zinc-100 border border-white/10 backdrop-blur-xl"
+                            : "bg-white text-zinc-800 border border-zinc-200 shadow-blue-500/5"
+                      } ${msg.role === "user" ? "rounded-tr-none" : "rounded-tl-none"}`}
+                    >
+                      {msg.chat_content}
+                    </div>
+                    <div
+                      className={`text-[9px] font-black uppercase tracking-widest opacity-30 ${msg.role === "user" ? "text-right" : "text-left"}`}
+                    >
+                      {msg.time} •{" "}
+                      {msg.role === "bot" ? "SENT BY CORE" : "CLIENT UPLINK"}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </>
+          )}
 
           {/* Typing Indicator / Empty State */}
           <div className="pt-8 flex flex-col items-center justify-center text-center space-y-6 opacity-30 mt-auto">
@@ -289,20 +278,22 @@ const ChatPreview = ({ theme }: { theme: "dark" | "light" }) => {
               </span>
             </div>
             <div className="flex flex-wrap gap-3">
-              {examplePrompts.map((prompt, i) => (
-                <motion.button
-                  key={i}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-3 rounded-2xl border text-[11px] font-black tracking-tight transition-all uppercase ${
-                    isDark
-                      ? "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:border-blue-500/50 hover:bg-blue-600/5 shadow-2xl"
-                      : "bg-white border-zinc-200 text-zinc-500 hover:text-blue-600 hover:border-blue-500/50 shadow-xl shadow-blue-500/5"
-                  }`}
-                >
-                  {prompt}
-                </motion.button>
-              ))}
+              {data?.chat.messages
+                .flatMap((msg) => msg.command)
+                .map((com, i) => (
+                  <motion.button
+                    key={i}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-6 py-3 rounded-2xl border text-[11px] font-black tracking-tight transition-all uppercase ${
+                      isDark
+                        ? "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:border-blue-500/50 hover:bg-blue-600/5 shadow-2xl"
+                        : "bg-white border-zinc-200 text-zinc-500 hover:text-blue-600 hover:border-blue-500/50 shadow-xl shadow-blue-500/5"
+                    }`}
+                  >
+                    {com}
+                  </motion.button>
+                ))}
             </div>
           </div>
 
@@ -366,7 +357,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
     mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
-  const icons: Record<string, any> = {
+  const icons: Record<string, LucideIcon> = {
     "lab-01": FileSearch,
     "lab-02": BarChart3,
     "lab-03": MessageSquare,
@@ -491,71 +482,36 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 };
 
 const AILabsPage: React.FC = () => {
-  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
+  const { data, isLoading } = useAiLabs();
+  if (isLoading) {
+    return (
+      <>
+        <PagesLoading isDark="dark" />
+      </>
+    );
+  }
   return (
     <div
       className={`relative min-h-screen pb-60 overflow-x-hidden ${
         isDark ? "bg-[#030303] text-white" : "bg-[#fafafa] text-zinc-900"
       }`}
     >
-      <header
-        className={`sticky top-0 z-[120] px-10 py-8 flex justify-between items-center backdrop-blur-3xl border-b transition-all ${
-          isDark
-            ? "bg-black/60 border-white/5"
-            : "bg-white/80 border-zinc-200 shadow-sm"
-        }`}
-      >
-        <motion.button
-          onClick={() => router.push("/projects")}
-          whileHover={{ x: -8 }}
-          className={`flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.6em] transition-all ${
-            isDark
-              ? "text-zinc-500 hover:text-white"
-              : "text-zinc-400 hover:text-black"
-          }`}
-        >
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isDark ? "bg-zinc-900 border-white/10" : "bg-white border-zinc-200"}`}
-          >
-            <ChevronLeft size={20} strokeWidth={3} />
-          </div>
-          Return_Node
-        </motion.button>
-        <div className="flex items-center gap-8">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 leading-none mb-1">
-              System_Uptime
-            </span>
-            <span className="text-xs font-mono font-bold text-blue-500">
-              99.992%_SYNC
-            </span>
-          </div>
-          <div className="w-[1px] h-8 bg-current opacity-10" />
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shadow-[0_0_15px_#2563eb]" />
-            <span className="text-[11px] font-black uppercase tracking-widest opacity-40">
-              fullstack_Labs_Auth
-            </span>
-          </div>
-        </div>
-      </header>
-
       <main className="relative z-10 max-w-7xl mx-auto px-10 space-y-64">
         <Hero />
 
         <div className="space-y-24">
           <div className="flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="space-y-4 text-center md:text-left">
-              <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tighter uppercase font-space leading-none">
-                Neural_Interface
+              <h2 className="text-5xl md:text-7xl font-body uppercase font-bold tracking-tighter font-space leading-none">
+                Neural Interface
               </h2>
-              <p className="text-[12px] font-black uppercase tracking-[0.6em] opacity-20">
-                Low-Latency Conversation Staging
+              <p className="text-xs md:text-sm font-black uppercase tracking-widest opacity-50">
+                Real-Time AI Chat • Full-Stack System Interaction
               </p>
             </div>
+
             <div className="hidden md:block h-[1px] flex-1 max-w-[400px] bg-blue-600/20 mx-10" />
             <div className="flex items-center gap-4">
               <div className="p-4 rounded-2xl bg-blue-600/10 text-blue-500 border border-blue-500/20">
@@ -563,31 +519,31 @@ const AILabsPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <ChatPreview theme={theme} />
+          <ChatPreview theme={theme as "dark" | "light"} />
         </div>
 
         <section className="space-y-32">
           <div className="text-center space-y-4">
             <h2 className="text-6xl md:text-8xl font-heading font-bold tracking-tighter uppercase font-space leading-none">
-              The_Roadmap
+              Execution Blueprint
             </h2>
             <p className="text-[14px] font-black uppercase tracking-[0.8em] opacity-20">
-              Architectural_Execution_Matrix
+              Strategy · Architecture · Execution
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* High Impact Features */}
-            {AI_EXPERIMENTS.filter((e) => e.model === "UI Ready").map(
-              (exp, idx) => (
+            {data?.roadmap.experiments
+              // .filter((e) => e.model === "UI Ready")
+              .map((exp, idx) => (
                 <FeatureCard
                   key={exp.id}
                   experiment={exp}
-                  theme={theme}
+                  theme={theme as "dark" | "light"}
                   index={idx}
                 />
-              ),
-            )}
+              ))}
           </div>
 
           {/* Barrier Divider */}
@@ -618,25 +574,37 @@ const AILabsPage: React.FC = () => {
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Strategic Roadmap Features */}
-            {AI_EXPERIMENTS.filter((e) => e.model === "Planned").map(
-              (exp, idx) => (
+            {data?.roadmap.experiments
+              .filter((e) => e.model === "Planned")
+              .map((exp, idx) => (
                 <FeatureCard
                   key={exp.id}
                   experiment={exp}
-                  theme={theme}
+                  theme={theme as "dark" | "light"}
                   index={idx + 10}
                 />
-              ),
-            )}
+              ))}
           </div>
         </section>
 
         <footer className="pt-40 border-t border-current/5 text-center space-y-16">
           <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
             {[
-              { label: "Compute Engine", val: "H100_NVIDIA", icon: Cpu },
-              { label: "Model Architecture", val: "Gemini_3_Pro", icon: Bot },
-              { label: "Latency Node", val: "< 15ms_Sync", icon: Zap },
+              {
+                label: "Core Stack",
+                val: "Next.js · TypeScript · AI APIs",
+                icon: Cpu,
+              },
+              {
+                label: "Architecture",
+                val: "Modular · Scalable · Performant",
+                icon: Bot,
+              },
+              {
+                label: "Deployment",
+                val: "Edge-Optimized · Low Latency",
+                icon: Zap,
+              },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -658,9 +626,8 @@ const AILabsPage: React.FC = () => {
           <p
             className={`text-xl opacity-40 max-w-3xl mx-auto font-medium leading-relaxed italic ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
           >
-            The boundary between human intent and machine execution is
-            dissolving. We are building the tools to bridge that gap with
-            absolute technical precision.
+            Building intelligent systems where design, performance, and
+            scalability converge.
           </p>
 
           <div className="flex flex-col items-center gap-4 pt-10 opacity-20">

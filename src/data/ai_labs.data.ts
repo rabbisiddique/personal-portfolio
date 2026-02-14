@@ -1,48 +1,48 @@
-import { LabExperiment } from "../../types";
+// import { LabExperiment } from "../../types";
 
-export const AI_EXPERIMENTS: LabExperiment[] = [
-  {
-    id: "lab-01",
-    title: "Project Explainer AI",
-    model: "UI Ready",
-    description:
-      "A conversational assistant that provides deep technical analysis of my portfolio projects, architectural choices, and tech stacks.",
-    complexity: 100,
-    status: "Stable",
-    accent: "#3b82f6",
-    tags: ["Natural Language", "Project Analysis"],
-  },
-  {
-    id: "lab-02",
-    title: "Skill Recommendation AI",
-    model: "Planned",
-    description:
-      "Intelligent matching engine that suggests specific technologies or frameworks based on your current project needs or industry trends.",
-    complexity: 0,
-    status: "Idle",
-    accent: "#94a3b8",
-    tags: ["Predictive Analytics", "Skill Matching"],
-  },
-  {
-    id: "lab-03",
-    title: "Profile Summary AI",
-    model: "UI Ready",
-    description:
-      "Dynamic summarization tool that crafts context-aware professional pitches based on real-time data from my current work archive.",
-    complexity: 100,
-    status: "Stable",
-    accent: "#3b82f6",
-    tags: ["Text Generation", "Personalization"],
-  },
-  {
-    id: "lab-04",
-    title: "Admin AI Tools",
-    model: "Planned",
-    description:
-      "A suite of automation utilities for managing portfolio content, optimizing asset delivery, and generating meta-descriptions.",
-    complexity: 0,
-    status: "Idle",
-    accent: "#94a3b8",
-    tags: ["Automation", "Productivity"],
-  },
-];
+// export const AI_EXPERIMENTS: LabExperiment[] = [
+//   {
+//     id: "lab-01",
+//     title: "Project Intelligence Engine",
+//     model: "Conversational AI",
+//     description:
+//       "A context-aware assistant delivering architectural breakdowns, performance decisions, and stack rationale behind each production system.",
+//     complexity: 92,
+//     status: "Production",
+//     accent: "#3b82f6",
+//     tags: ["LLM Integration", "System Analysis"],
+//   },
+//   {
+//     id: "lab-02",
+//     title: "Tech Stack Optimizer",
+//     model: "Predictive Engine",
+//     description:
+//       "Recommendation layer that aligns technology choices with scalability goals, industry momentum, and product constraints.",
+//     complexity: 45,
+//     status: "In Development",
+//     accent: "#94a3b8",
+//     tags: ["Decision Systems", "Trend Modeling"],
+//   },
+//   {
+//     id: "lab-03",
+//     title: "Adaptive Profile Generator",
+//     model: "Dynamic Content AI",
+//     description:
+//       "Real-time professional pitch engine that adapts messaging based on audience context and current project signals.",
+//     complexity: 88,
+//     status: "Production",
+//     accent: "#3b82f6",
+//     tags: ["NLP", "Personalization Engine"],
+//   },
+//   {
+//     id: "lab-04",
+//     title: "Portfolio Automation Suite",
+//     model: "Workflow Intelligence",
+//     description:
+//       "Operational tooling layer automating content orchestration, metadata optimization, and deployment efficiency.",
+//     complexity: 30,
+//     status: "Research Phase",
+//     accent: "#94a3b8",
+//     tags: ["Automation", "Content Systems"],
+//   },
+// ];

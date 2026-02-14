@@ -31,7 +31,7 @@ export function useAiLabs() {
 
     // Chat channel
     const chatChannel = supabase
-      .channel("ai-labs-chat-channel") // unique name
+      .channel(`ai-labs-chat-${Math.random()}`) // unique per component instance
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ai_lab_chats" },
@@ -45,7 +45,7 @@ export function useAiLabs() {
               case "INSERT":
                 return {
                   ...current,
-                  chat: { messages: [msg, ...current.chat.messages] },
+                  chat: { messages: [...current.chat.messages, msg] }, // ✅ Add to END
                 };
               case "UPDATE":
                 return {
@@ -75,7 +75,7 @@ export function useAiLabs() {
 
     // Experiment channel
     const expChannel = supabase
-      .channel("ai-labs-exp-channel") // unique name
+      .channel(`ai-labs-exprimentals-${Math.random()}`) // unique per component instance
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ai_lab_experiments" },
@@ -88,7 +88,7 @@ export function useAiLabs() {
                 return {
                   ...current,
                   roadmap: {
-                    experiments: [exp, ...current.roadmap.experiments],
+                    experiments: [exp, ...current.roadmap.experiments], // ✅ Add to START
                   },
                 };
               case "UPDATE":

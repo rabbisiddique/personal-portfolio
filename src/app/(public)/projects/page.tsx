@@ -1,6 +1,7 @@
 "use client";
 import ProjectCard from "@/components/ProjectCard";
 import { PROJECTS } from "@/data/projects.data";
+import { useProject } from "@/hooks/useProjects";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -20,6 +21,7 @@ import {
 } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 export default function ProjectsPage() {
+  const { projects, isLoading } = useProject();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -27,7 +29,7 @@ export default function ProjectsPage() {
   const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
 
   const isBeginning = activeIndex === 0;
-  const isEnd = activeIndex === PROJECTS.length - 1;
+  const isEnd = activeIndex === projects.length - 1;
 
   return (
     <div
@@ -47,22 +49,26 @@ export default function ProjectsPage() {
           className="text-center space-y-2"
         >
           <h1
-            className={`text-3xl md:text-5xl font-black tracking-tighter uppercase font-space leading-none ${isDark ? "text-white/30" : "text-black/15"}`}
+            className={`text-3xl md:text-5xl font-black tracking-tight uppercase leading-none ${
+              isDark ? "text-white" : "text-black"
+            }`}
           >
-            SELECTED{" "}
+            SYSTEMS{" "}
             <span
               className="text-transparent"
               style={{
                 WebkitTextStroke: isDark
-                  ? "1.5px rgba(255,255,255,0.15)"
-                  : "1.5px rgba(0,0,0,0.1)",
+                  ? "1.5px rgba(255,255,255,0.8)"
+                  : "1.5px rgba(0,0,0,0.8)",
               }}
             >
-              ARCHIVES
+              I’VE ENGINEERED
             </span>
           </h1>
-          <p className="text-[8px] md:text-[9px] font-black opacity-15 uppercase tracking-[1.2em] max-w-3xl mx-auto pl-4">
-            System Logic & Experience Architecture
+
+          <p className="text-xs md:text-sm font-semibold opacity-70 uppercase tracking-widest">
+            Full-Stack Systems • Scalable Infrastructure • Production-Ready
+            Execution
           </p>
         </motion.div>
       </div>
@@ -113,7 +119,7 @@ export default function ProjectsPage() {
         }}
         className="h-full w-full z-10"
       >
-        {PROJECTS.map((project, idx) => (
+        {projects.map((project, idx) => (
           <SwiperSlide key={project.id} className="w-full h-full">
             {({ isActive }) => (
               <ProjectCard

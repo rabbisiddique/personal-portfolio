@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, Code2, Eye, Play } from "lucide-react";
 import React from "react";
-import { Project } from "../../types";
+import { Project } from "../../admin.types";
 
 interface ProjectCardProps {
   project: Project;
@@ -51,8 +51,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   : "saturate(0.5) brightness(0.4) blur(10px)",
               }}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              src={project.image}
-              alt={project.title}
+              src={project?.image_url}
+              alt={project?.project_title}
               className="w-full h-full object-cover"
             />
             <div
@@ -87,7 +87,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <h3
                 className={`text-4xl md:text-7xl font-space font-black leading-[0.9] uppercase tracking-tighter ${isDark ? "text-white" : "text-black"}`}
               >
-                {project.title.split(" ").map((word, i) => (
+                {project?.project_title?.split(" ").map((word, i) => (
                   <span key={i} className="block">
                     {i % 2 !== 0 ? (
                       <span
@@ -118,9 +118,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex flex-wrap items-center gap-8 md:gap-10">
               <div className="flex gap-4">
                 {[
-                  { icon: Eye, link: project.links.demo, label: "PRVW" },
-                  { icon: Code2, link: project.links.github, label: "CODE" },
-                  { icon: Play, link: project.links.video, label: "DEMO" },
+                  { icon: Eye, link: project?.links?.live_link, label: "PRVW" },
+                  {
+                    icon: Code2,
+                    link: project.links?.github_link,
+                    label: "CODE",
+                  },
+                  {
+                    icon: Play,
+                    link: project.links?.video_link,
+                    label: "DEMO",
+                  },
                 ].map((action, i) => (
                   <motion.button
                     key={i}
@@ -151,8 +159,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
               <button
                 onClick={() =>
-                  project.links.demo &&
-                  window.open(project.links.demo, "_blank")
+                  project?.links?.live_link &&
+                  window.open(project?.links?.live_link, "_blank")
                 }
                 className="flex items-center gap-4 group/uplink"
               >
@@ -174,7 +182,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
             {/* Tech Tags */}
             <div className="flex flex-wrap gap-x-3 gap-y-3 pt-8 border-t border-current/5 w-full">
-              {project.techStack.map((tech) => (
+              {project.tech_stack.map((tech) => (
                 <div
                   key={tech}
                   className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border transition-all duration-300 ${
